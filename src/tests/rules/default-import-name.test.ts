@@ -12,6 +12,30 @@ ruleTester.run("default-import-name", rule, {
         },
       ],
     },
+    {
+      code: `import user from "./get-user.ts";`,
+      output: `import getUser from "./get-user.ts";`,
+      errors: [
+        {
+          message:
+            "Unmatched default import name 'user' for file 'get-user.ts'.",
+        },
+      ],
+    },
+    {
+      code: `import account from "./user";`,
+      output: `import user from "./user";`,
+      errors: [
+        {
+          message: "Unmatched default import name 'account' for file 'user'.",
+        },
+      ],
+    },
   ],
-  valid: [`import A from "./A.astro";`],
+  valid: [
+    `import A from "./A.astro";`,
+    // Should convert files with - to camelCase
+    `import getUser from "./get-user.ts";`,
+    `import getUser from "./get-user";`,
+  ],
 });

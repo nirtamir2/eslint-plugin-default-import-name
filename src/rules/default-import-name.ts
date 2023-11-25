@@ -1,5 +1,6 @@
 import { createRule } from "../createRule";
 import type { BaseModuleSpecifier, ImportDefaultSpecifier } from "estree";
+import camelCase from "camelcase";
 
 function isImportDefaultSpecifier(
   specifier: BaseModuleSpecifier,
@@ -64,6 +65,10 @@ export default createRule({
           ? fileName.split(".").slice(0, -1).join(".")
           : fileName;
 
+        const requiredImportName = fileNameWithoutExtension.includes("-")
+          ? camelCase(fileNameWithoutExtension)
+          : fileNameWithoutExtension;
+
         const defaultImport = node.specifiers.find((specifier) =>
           isImportDefaultSpecifier(specifier),
         );
@@ -71,7 +76,7 @@ export default createRule({
           return;
         }
         const defaultImportName = defaultImport.local.name;
-        if (defaultImportName !== fileNameWithoutExtension) {
+        if (defaultImportName !== requiredImportName) {
           context.report({
             node,
             messageId: "unmatchedDefaultImportName",
@@ -80,7 +85,7 @@ export default createRule({
               fileName,
             },
             fix(fixer) {
-              return fixer.replaceText(defaultImport, fileNameWithoutExtension);
+              return fixer.replaceText(defaultImport, requiredImportName);
             },
           });
         }
