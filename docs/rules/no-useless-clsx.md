@@ -10,6 +10,6 @@
 
 | Name                      |
 | :------------------------ |
-| `pathAliasSymbols` |
+| `ignoredRegexes` |
 
 <!-- end auto-generated rule options list -->

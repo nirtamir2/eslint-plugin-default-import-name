@@ -8,46 +8,15 @@ function isImportDefaultSpecifier(
   return specifier.type === "ImportDefaultSpecifier";
 }
 
-function isFileExtensionIgnored({
-  fileName,
-  ignoreFileExtensions,
-}: {
-  fileName: string;
-  ignoreFileExtensions: Set<string>;
-}) {
-  const fileOrFileExtension = fileName.split(".").at(-1);
-  return (
-    fileOrFileExtension != null && ignoreFileExtensions.has(fileOrFileExtension)
-  );
-}
-
 function shouldIgnoreFile({
   sourceImport,
-  pathAliasSymbols,
-  ignoreFileExtensions,
+  ignoredRegexes,
 }: {
   sourceImport: string;
-  pathAliasSymbols: Set<string>;
-  ignoreFileExtensions: Set<string>;
+  ignoredRegexes: Set<string>;
 }) {
-  if (!sourceImport.includes(".")) {
-    const isContainPathAliasSymbol = [...pathAliasSymbols.values()].some(
-      (pathAliasSymbol) => sourceImport.startsWith(pathAliasSymbol),
-    );
-
-    if (!isContainPathAliasSymbol) {
-      return true;
-    }
-  }
-
-  const fileName = sourceImport.split("/").pop();
-  if (fileName == null) {
-    return true;
-  }
-
-  return isFileExtensionIgnored({
-    fileName,
-    ignoreFileExtensions,
+  return [...ignoredRegexes.values()].some((regex) => {
+    return new RegExp(regex).test(sourceImport);
   });
 }
 
@@ -85,21 +54,20 @@ export default createRule({
   },
 
   create(context) {
-    const configDefaultImportNames =
+    const configExcludedRegexes =
       // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-      (context.options[0]?.pathAliasSymbols as Array<string> | undefined) ?? [];
+      (context.options[0]?.ignoredRegexes as Array<string> | undefined) ?? [];
 
-    const pathAliasSymbols = new Set(["@", "~", ...configDefaultImportNames]);
-
-    const configIgnoreFileExtensions =
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-      (context.options[0]?.ignoredFileExtensions as
-        | Array<string>
-        | undefined) ?? [];
-
-    const ignoreFileExtensions = new Set([
-      "css",
-      ...configIgnoreFileExtensions,
+    const ignoredRegexes = new Set([
+      // ignored file extensions
+      ".css$",
+      /**
+       * Third party modules that are not path alias
+       * File that does not include "."
+       * and not start with "~" or "\@" which are common path alias
+       */
+      "^(?![@~])[^.]*$",
+      ...configExcludedRegexes,
     ]);
 
     return {
@@ -112,8 +80,7 @@ export default createRule({
         if (
           shouldIgnoreFile({
             sourceImport,
-            pathAliasSymbols,
-            ignoreFileExtensions,
+            ignoredRegexes,
           })
         ) {
           return;
