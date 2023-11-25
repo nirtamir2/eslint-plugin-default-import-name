@@ -10,17 +10,7 @@
   ],
   "author": "Nir Tamir <nirtamir2@gmail.com>",
   "license": "MIT",
-  "files": [
-    "./lib"
-  ],
-  "exports": {
-    ".": {
-      "require": "./lib/index.js",
-      "import": "./lib/index.mjs"
-    },
-    "./package.json": "./package.json"
-  },
-  "type": "module",
+  "main": "lib/index.js",
   "homepage": "https://github.com/nirtamir2/eslint-plugin-default-import-name#readme",
   "repository": {
     "type": "git",
@@ -30,7 +20,7 @@
     "url": "https://github.com/nirtamir2/eslint-plugin-default-import-name/issues"
   },
   "scripts": {
-    "build": "vite build",
+    "build": "tsc",
     "lint": "eslint --fix \"src/**/*.{ts,tsx,js,jsx}\"",
     "lint:eslint-docs": "pnpm run update:eslint-docs",
     "lint:docs": "markdownlint \"**/*.md\"",
@@ -55,7 +45,6 @@
     "markdownlint-cli": "^0.37.0",
     "prettier": "^3.1.0",
     "typescript": "^5.3.2",
-    "vite": "^5.0.2",
     "vitest": "^0.34.6"
   },
   "dependencies": {
