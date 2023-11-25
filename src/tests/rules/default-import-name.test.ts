@@ -1,4 +1,3 @@
-/* eslint-disable sonarjs/no-duplicate-string */
 import rule from "../../rules/default-import-name.js";
 import { ruleTester } from "./ruleTester.js";
 
@@ -85,5 +84,3 @@ ruleTester.run("default-import-name", rule, {
     `import styles from "./a.module.css";`,
   ],
 });
-
-/* eslint-enable sonarjs/no-duplicate-string */
