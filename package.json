@@ -1,0 +1,60 @@
+{
+  "name": "eslint-plugin-default-import-name",
+  "version": "0.0.0",
+  "description": "Rule for using default import as file name in your project",
+  "keywords": [
+    "eslint",
+    "eslintplugin",
+    "eslint-plugin",
+    "import"
+  ],
+  "author": "Nir Tamir <nirtamir2@gmail.com>",
+  "license": "MIT",
+  "main": "lib/index.js",
+  "homepage": "https://github.com/nirtamir2/eslint-plugin-default-import-name#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nirtamir2/eslint-plugin-default-import-name/issues"
+  },
+  "bugs": {
+    "url": "https://github.com/nirtamir2/eslint-plugin-default-import-name/issues"
+  },
+  "scripts": {
+    "build": "tsc",
+    "lint": "eslint --fix \"src/**/*.{ts,tsx,js,jsx}\"",
+    "lint:eslint-docs": "pnpm run update:eslint-docs",
+    "lint:docs": "markdownlint \"**/*.md\"",
+    "test": "vitest",
+    "type-check": "tsc --noEmit",
+    "update:eslint-docs": "eslint-doc-generator",
+    "format": "prettier --ignore-path .gitignore --write **/*.{ts,md,js,json,yaml,yml}",
+    "changeset:version": "changeset version && pnpm install --no-frozen-lockfile",
+    "changeset:publish": "pnpm run build && changeset publish"
+  },
+  "devDependencies": {
+    "@changesets/cli": "^2.26.2",
+    "@tsconfig/node16": "^16.1.1",
+    "@tsconfig/strictest": "^2.0.2",
+    "@types/eslint": "^8.44.7",
+    "@types/estree": "^1.0.5",
+    "@types/node": "^20.10.0",
+    "console-fail-test": "^0.2.3",
+    "eslint": "^8.54.0",
+    "eslint-doc-generator": "^1.6.1",
+    "eslint-plugin-eslint-plugin": "^5.1.1",
+    "markdownlint-cli": "^0.37.0",
+    "prettier": "^3.1.0",
+    "typescript": "^5.3.2",
+    "vitest": "^0.34.6"
+  },
+  "dependencies": {
+    "eslint-config-nirtamir2": "^0.0.57"
+  },
+  "peerDependencies": {
+    "eslint": ">=8.0.0",
+    "jsonc-eslint-parser": "^2.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
