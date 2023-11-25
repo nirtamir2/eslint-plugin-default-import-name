@@ -16,9 +16,9 @@ devDependencies:
   '@changesets/cli':
     specifier: ^2.26.2
     version: 2.26.2
-  '@tsconfig/node16':
-    specifier: ^16.1.1
-    version: 16.1.1
+  '@tsconfig/node-lts':
+    specifier: ^18.12.5
+    version: 18.12.5
   '@tsconfig/strictest':
     specifier: ^2.0.2
     version: 2.0.2
@@ -805,8 +805,8 @@ packages:
       eslint: 8.54.0
     dev: false
 
-  /@tsconfig/node16@16.1.1:
-    resolution: {integrity: sha512-+pio93ejHN4nINX4pXqfnR/fPLRtJBaT4ORaa5RH0Oc1zoYmo2B2koG+M328CQhHKn1Wj6FcOxCDFXAot9NhvA==}
+  /@tsconfig/node-lts@18.12.5:
+    resolution: {integrity: sha512-KJZX0kQ5FBv77WDVzmQ9y1dUjaJCNXAAz3LSsg5cMwH0AUijVdDQtII+IVprEXdb13U9GjVOBxBzyRvr/ozPxw==}
     dev: true
 
   /@tsconfig/strictest@2.0.2:
