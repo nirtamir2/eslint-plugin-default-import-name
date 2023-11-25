@@ -19,7 +19,6 @@
   "bugs": {
     "url": "https://github.com/nirtamir2/eslint-plugin-default-import-name/issues"
   },
-  "type": "module",
   "scripts": {
     "build": "tsc",
     "lint": "eslint --fix \"src/**/*.{ts,tsx,js,jsx}\"",
@@ -49,7 +48,7 @@
     "vitest": "^0.34.6"
   },
   "dependencies": {
-    "camelcase": "^8.0.0",
+    "camelcase": "^6.3.0",
     "eslint-config-nirtamir2": "^0.0.57"
   },
   "peerDependencies": {

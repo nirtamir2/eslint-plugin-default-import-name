@@ -6,8 +6,8 @@ settings:
 
 dependencies:
   camelcase:
-    specifier: ^8.0.0
-    version: 8.0.0
+    specifier: ^6.3.0
+    version: 6.3.0
   eslint-config-nirtamir2:
     specifier: ^0.0.57
     version: 0.0.57(@types/eslint@8.44.7)(eslint@8.54.0)(typescript@5.3.2)
@@ -1455,9 +1455,9 @@ packages:
     engines: {node: '>=6'}
     dev: true
 
-  /camelcase@8.0.0:
-    resolution: {integrity: sha512-8WB3Jcas3swSvjIeA2yvCJ+Miyz5l1ZmB6HFb9R1317dt9LCQoswg/BGrmAmkWVEszSrrg4RwmO46qIm2OEnSA==}
-    engines: {node: '>=16'}
+  /camelcase@6.3.0:
+    resolution: {integrity: sha512-Gmy6FhYlCY7uOElZUSbxo2UCDH8owEk996gkbrpsgGtrJLM3J7jGxl9Ic7Qwwj4ivOE5AWZWRMecDdF7hqGjFA==}
+    engines: {node: '>=10'}
     dev: false
 
   /caniuse-lite@1.0.30001564:
