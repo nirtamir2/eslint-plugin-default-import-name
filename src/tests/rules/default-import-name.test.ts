@@ -116,5 +116,13 @@ ruleTester.run("default-import-name", rule, {
     `import A from "~/A.astro";`,
     `import A from "~/A";`,
     `import A from "@/A";`,
+    {
+      code: `import something from "./ignoredSource.astro";`,
+      options: [
+        {
+          ignoredSourceRegexes: ["ignoredSource.astro$"],
+        },
+      ],
+    },
   ],
 });
