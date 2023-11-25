@@ -73,14 +73,48 @@ ruleTester.run("default-import-name", rule, {
         },
       ],
     },
+    {
+      code: `import B from "~/A";`,
+      output: `import A from "~/A";`,
+      errors: [
+        {
+          messageId: "unmatchedDefaultImportName",
+          data: {
+            fileName: "A",
+            expectedImportName: "A",
+            actualImportName: "B",
+          },
+        },
+      ],
+    },
+    {
+      code: `import B from "@/A";`,
+      output: `import A from "@/A";`,
+      errors: [
+        {
+          messageId: "unmatchedDefaultImportName",
+          data: {
+            fileName: "A",
+            expectedImportName: "A",
+            actualImportName: "B",
+          },
+        },
+      ],
+    },
   ],
   valid: [
     `import A from "./A.astro";`,
     // Should convert files with - to camelCase
     `import getUser from "./get-user.ts";`,
     `import getUser from "./get-user";`,
+    // Should ignore 3rd party libraries
     `import something from "third-party-library";`,
-    `import A from "@/A.astro";`,
+    // Should ignore css files
     `import styles from "./a.module.css";`,
+    // Should still check path alias files
+    `import A from "@/A.astro";`,
+    `import A from "~/A.astro";`,
+    `import A from "~/A";`,
+    `import A from "@/A";`,
   ],
 });
