@@ -1,3 +1,4 @@
+/* eslint-disable sonarjs/no-duplicate-string */
 import rule from "../../rules/default-import-name";
 import { ruleTester } from "./ruleTester";
 
@@ -31,11 +32,33 @@ ruleTester.run("default-import-name", rule, {
         },
       ],
     },
+    {
+      code: `import B from "@/A.astro";`,
+      output: `import A from "@/A.astro";`,
+      errors: [
+        {
+          message: "Unmatched default import name 'B' for file 'A.astro'.",
+        },
+      ],
+    },
+    {
+      code: `import B from "~/A.astro";`,
+      output: `import A from "~/A.astro";`,
+      errors: [
+        {
+          message: "Unmatched default import name 'B' for file 'A.astro'.",
+        },
+      ],
+    },
   ],
   valid: [
     `import A from "./A.astro";`,
     // Should convert files with - to camelCase
     `import getUser from "./get-user.ts";`,
     `import getUser from "./get-user";`,
+    `import something from "third-party-library";`,
+    `import A from "@/A.astro";`,
   ],
 });
+
+/* eslint-enable sonarjs/no-duplicate-string */

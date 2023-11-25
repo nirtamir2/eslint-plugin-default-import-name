@@ -22,7 +22,7 @@ export default createRule({
       {
         type: "object",
         properties: {
-          addiotionalDefaultImportNames: {
+          pathAliasSymbols: {
             anyOf: [
               {
                 type: ["array"],
@@ -42,13 +42,11 @@ export default createRule({
   },
 
   create(context) {
-    // const configDefaultImportNames =
-    //   // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-    //   (context.options[0]?.addiotionalDefaultImportNames as
-    //     | Array<string>
-    //     | undefined) ?? [];
-    //
-    // const defaultImportNames = new Set([...configDefaultImportNames]);
+    const configDefaultImportNames =
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      (context.options[0]?.pathAliasSymbols as Array<string> | undefined) ?? [];
+
+    const pathAliasSymbols = new Set(["@", "~", ...configDefaultImportNames]);
 
     return {
       ImportDeclaration(node) {
@@ -56,11 +54,22 @@ export default createRule({
         if (typeof sourceImport !== "string") {
           return;
         }
+
+        if (!sourceImport.includes(".")) {
+          const isContainPathAliasSymbol = [...pathAliasSymbols.values()].some(
+              (pathAliasSymbol) => sourceImport.startsWith(pathAliasSymbol),
+          );
+
+          if (!isContainPathAliasSymbol) {
+            return;
+          }
+        }
+
         const fileName = sourceImport.split("/").pop();
         if (fileName == null) {
           return;
         }
-        // Correct name
+
         const fileNameWithoutExtension = fileName.includes(".")
           ? fileName.split(".").slice(0, -1).join(".")
           : fileName;

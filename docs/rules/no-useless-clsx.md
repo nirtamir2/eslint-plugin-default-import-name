@@ -10,6 +10,6 @@
 
 | Name                      |
 | :------------------------ |
-| `addiotionalDefaultImportNames` |
+| `pathAliasSymbols` |
 
 <!-- end auto-generated rule options list -->
