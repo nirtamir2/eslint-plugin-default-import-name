@@ -1,4 +1,4 @@
-import { createRule } from "../createRule";
+import { createRule } from "../createRule.js";
 import type { BaseModuleSpecifier, ImportDefaultSpecifier } from "estree";
 import camelCase from "camelcase";
 
@@ -6,6 +6,49 @@ function isImportDefaultSpecifier(
   specifier: BaseModuleSpecifier,
 ): specifier is ImportDefaultSpecifier {
   return specifier.type === "ImportDefaultSpecifier";
+}
+
+function isFileExtensionIgnored({
+  fileName,
+  ignoreFileExtensions,
+}: {
+  fileName: string;
+  ignoreFileExtensions: Set<string>;
+}) {
+  const fileOrFileExtension = fileName.split(".").at(-1);
+  return (
+    fileOrFileExtension != null && ignoreFileExtensions.has(fileOrFileExtension)
+  );
+}
+
+function shouldIgnoreFile({
+  sourceImport,
+  pathAliasSymbols,
+  ignoreFileExtensions,
+}: {
+  sourceImport: string;
+  pathAliasSymbols: Set<string>;
+  ignoreFileExtensions: Set<string>;
+}) {
+  if (!sourceImport.includes(".")) {
+    const isContainPathAliasSymbol = [...pathAliasSymbols.values()].some(
+      (pathAliasSymbol) => sourceImport.startsWith(pathAliasSymbol),
+    );
+
+    if (!isContainPathAliasSymbol) {
+      return true;
+    }
+  }
+
+  const fileName = sourceImport.split("/").pop();
+  if (fileName == null) {
+    return true;
+  }
+
+  return isFileExtensionIgnored({
+    fileName,
+    ignoreFileExtensions,
+  });
 }
 
 export default createRule({
@@ -48,6 +91,17 @@ export default createRule({
 
     const pathAliasSymbols = new Set(["@", "~", ...configDefaultImportNames]);
 
+    const configIgnoreFileExtensions =
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      (context.options[0]?.ignoredFileExtensions as
+        | Array<string>
+        | undefined) ?? [];
+
+    const ignoreFileExtensions = new Set([
+      "css",
+      ...configIgnoreFileExtensions,
+    ]);
+
     return {
       ImportDeclaration(node) {
         const sourceImport = node.source.value;
@@ -55,14 +109,14 @@ export default createRule({
           return;
         }
 
-        if (!sourceImport.includes(".")) {
-          const isContainPathAliasSymbol = [...pathAliasSymbols.values()].some(
-              (pathAliasSymbol) => sourceImport.startsWith(pathAliasSymbol),
-          );
-
-          if (!isContainPathAliasSymbol) {
-            return;
-          }
+        if (
+          shouldIgnoreFile({
+            sourceImport,
+            pathAliasSymbols,
+            ignoreFileExtensions,
+          })
+        ) {
+          return;
         }
 
         const fileName = sourceImport.split("/").pop();
