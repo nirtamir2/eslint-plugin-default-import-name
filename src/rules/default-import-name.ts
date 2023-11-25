@@ -1,4 +1,4 @@
-import { createRule } from "../createRule.js";
+import { createRule } from "../createRule";
 import type { BaseModuleSpecifier, ImportDefaultSpecifier } from "estree";
 import camelCase from "camelcase";
 

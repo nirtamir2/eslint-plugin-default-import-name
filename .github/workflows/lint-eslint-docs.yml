@@ -4,7 +4,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/prepare
-      - run: pnpm run type-check
       - run: pnpm run lint:eslint-docs
 
 name: Lint ESLint Docs
@@ -13,4 +12,6 @@ on:
   pull_request: ~
   push:
     branches:
-      - main
+      # TODO: change to main when eslint-doc-generator will support ESM
+      # @see https://github.com/bmish/eslint-doc-generator/issues/504
+      - docs

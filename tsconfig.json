@@ -4,7 +4,17 @@
     "@tsconfig/strictest/tsconfig.json"
   ],
   "compilerOptions": {
-    "outDir": "lib",
+    "forceConsistentCasingInFileNames": true,
+    "moduleResolution": "bundler",
+    "verbatimModuleSyntax": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "module": "esnext",
+    "target": "esnext",
+    "types": ["node"],
+    "allowJs": true,
+    "strict": true,
+    "noEmit": true
   },
   "include": ["src"]
 }

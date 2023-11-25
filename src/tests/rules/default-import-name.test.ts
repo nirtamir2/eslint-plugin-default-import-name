@@ -1,5 +1,5 @@
-import rule from "../../rules/default-import-name.js";
-import { ruleTester } from "./ruleTester.js";
+import rule from "../../rules/default-import-name";
+import { ruleTester } from "./ruleTester";
 
 ruleTester.run("default-import-name", rule, {
   invalid: [
