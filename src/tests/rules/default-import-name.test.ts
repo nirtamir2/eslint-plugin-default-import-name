@@ -9,7 +9,12 @@ ruleTester.run("default-import-name", rule, {
       output: `import A from "./A.astro";`,
       errors: [
         {
-          message: "Unmatched default import name 'B' for file 'A.astro'.",
+          messageId: "unmatchedDefaultImportName",
+          data: {
+            fileName: "A.astro",
+            expectedImportName: "A",
+            actualImportName: "B",
+          },
         },
       ],
     },
@@ -18,8 +23,12 @@ ruleTester.run("default-import-name", rule, {
       output: `import getUser from "./get-user.ts";`,
       errors: [
         {
-          message:
-            "Unmatched default import name 'user' for file 'get-user.ts'.",
+          messageId: "unmatchedDefaultImportName",
+          data: {
+            fileName: "get-user.ts",
+            expectedImportName: "getUser",
+            actualImportName: "user",
+          },
         },
       ],
     },
@@ -28,7 +37,12 @@ ruleTester.run("default-import-name", rule, {
       output: `import user from "./user";`,
       errors: [
         {
-          message: "Unmatched default import name 'account' for file 'user'.",
+          messageId: "unmatchedDefaultImportName",
+          data: {
+            fileName: "user",
+            expectedImportName: "user",
+            actualImportName: "account",
+          },
         },
       ],
     },
@@ -37,7 +51,12 @@ ruleTester.run("default-import-name", rule, {
       output: `import A from "@/A.astro";`,
       errors: [
         {
-          message: "Unmatched default import name 'B' for file 'A.astro'.",
+          messageId: "unmatchedDefaultImportName",
+          data: {
+            fileName: "A.astro",
+            expectedImportName: "A",
+            actualImportName: "B",
+          },
         },
       ],
     },
@@ -46,7 +65,12 @@ ruleTester.run("default-import-name", rule, {
       output: `import A from "~/A.astro";`,
       errors: [
         {
-          message: "Unmatched default import name 'B' for file 'A.astro'.",
+          messageId: "unmatchedDefaultImportName",
+          data: {
+            fileName: "A.astro",
+            expectedImportName: "A",
+            actualImportName: "B",
+          },
         },
       ],
     },

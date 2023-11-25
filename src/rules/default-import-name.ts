@@ -49,7 +49,7 @@ export default createRule({
     ],
     messages: {
       unmatchedDefaultImportName:
-        "Unmatched default import name '{{ defaultImportName }}' for file '{{ fileName }}'.",
+        "Inconsistent naming in '{{fileName}}'. The default import '{{actualImportName}}' does not match the expected '{{expectedImportName}}",
     },
   },
 
@@ -95,7 +95,7 @@ export default createRule({
           ? fileName.split(".").slice(0, -1).join(".")
           : fileName;
 
-        const requiredImportName = fileNameWithoutExtension.includes("-")
+        const expectedImportName = fileNameWithoutExtension.includes("-")
           ? camelCase(fileNameWithoutExtension)
           : fileNameWithoutExtension;
 
@@ -105,17 +105,18 @@ export default createRule({
         if (defaultImport == null || !isImportDefaultSpecifier(defaultImport)) {
           return;
         }
-        const defaultImportName = defaultImport.local.name;
-        if (defaultImportName !== requiredImportName) {
+        const actualImportName = defaultImport.local.name;
+        if (actualImportName !== expectedImportName) {
           context.report({
             node,
             messageId: "unmatchedDefaultImportName",
             data: {
-              defaultImportName,
               fileName,
+              actualImportName,
+              expectedImportName,
             },
             fix(fixer) {
-              return fixer.replaceText(defaultImport, requiredImportName);
+              return fixer.replaceText(defaultImport, expectedImportName);
             },
           });
         }
