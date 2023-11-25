@@ -10,12 +10,12 @@ function isImportDefaultSpecifier(
 
 function shouldIgnoreFile({
   sourceImport,
-  ignoredRegexes,
+  ignoredSourceRegexes,
 }: {
   sourceImport: string;
-  ignoredRegexes: Set<string>;
+  ignoredSourceRegexes: Set<string>;
 }) {
-  return [...ignoredRegexes.values()].some((regex) => {
+  return [...ignoredSourceRegexes.values()].some((regex) => {
     return new RegExp(regex).test(sourceImport);
   });
 }
@@ -25,7 +25,7 @@ export default createRule({
     type: "problem",
     docs: {
       url: "https://github.com/nirtamir2/eslint-plugin-default-import-name#readme",
-      description: 'enforce use of "clsx" with dynamic data argument',
+      description: "enforce default imports matching file names",
       category: "Best Practices",
       recommended: true,
     },
@@ -34,7 +34,8 @@ export default createRule({
       {
         type: "object",
         properties: {
-          pathAliasSymbols: {
+          ignoredSourceRegexes: {
+            description: "List of regexes to ignore import sources",
             anyOf: [
               {
                 type: ["array"],
@@ -56,9 +57,10 @@ export default createRule({
   create(context) {
     const configExcludedRegexes =
       // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-      (context.options[0]?.ignoredRegexes as Array<string> | undefined) ?? [];
+      (context.options[0]?.ignoredSourceRegexes as Array<string> | undefined) ??
+      [];
 
-    const ignoredRegexes = new Set([
+    const ignoredSourceRegexes = new Set([
       // ignored file extensions
       ".css$",
       /**
@@ -80,7 +82,7 @@ export default createRule({
         if (
           shouldIgnoreFile({
             sourceImport,
-            ignoredRegexes,
+            ignoredSourceRegexes,
           })
         ) {
           return;

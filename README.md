@@ -1,6 +1,6 @@
 # eslint-plugin-default-import-name
 
-Rules for consistent usage of `clsx` functions.
+ESLint rule: enforce default imports matching file names
 
 ## Installation
 
@@ -29,7 +29,7 @@ module.exports = {
     {
       plugins: ["default-import-name"],
       rules: {
-        "clsx/default-import-name": "error",
+        "default-import-name/default-import-name": "error",
       },
   ],
 };

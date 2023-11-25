@@ -10,6 +10,6 @@
 
 | Name                      |
 | :------------------------ |
-| `ignoredRegexes` |
+| `ignoredSourceRegexes` |
 
 <!-- end auto-generated rule options list -->
