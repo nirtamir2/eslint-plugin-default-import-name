@@ -5,15 +5,15 @@ settings:
   excludeLinksFromLockfile: false
 
 dependencies:
-  camelcase:
-    specifier: ^6.3.0
-    version: 6.3.0
   eslint-config-nirtamir2:
     specifier: ^0.0.57
     version: 0.0.57(@types/eslint@8.44.7)(eslint@8.54.0)(typescript@5.3.2)
   jsonc-eslint-parser:
     specifier: ^2.0.0
     version: 2.4.0
+  scule:
+    specifier: ^1.1.1
+    version: 1.1.1
 
 devDependencies:
   '@changesets/cli':
@@ -1454,11 +1454,6 @@ packages:
     resolution: {integrity: sha512-L28STB170nwWS63UjtlEOE3dldQApaJXZkOI1uMFfzf3rRuPegHaHesyee+YxQ+W6SvRDQV6UrdOdRiR153wJg==}
     engines: {node: '>=6'}
     dev: true
-
-  /camelcase@6.3.0:
-    resolution: {integrity: sha512-Gmy6FhYlCY7uOElZUSbxo2UCDH8owEk996gkbrpsgGtrJLM3J7jGxl9Ic7Qwwj4ivOE5AWZWRMecDdF7hqGjFA==}
-    engines: {node: '>=10'}
-    dev: false
 
   /caniuse-lite@1.0.30001564:
     resolution: {integrity: sha512-DqAOf+rhof+6GVx1y+xzbFPeOumfQnhYzVnZD6LAXijR77yPtm9mfOcqOnT3mpnJiZVT+kwLAFnRlZcIz+c6bg==}
@@ -4713,6 +4708,10 @@ packages:
       '@eslint-community/regexpp': 4.10.0
       refa: 0.11.0
       regexp-ast-analysis: 0.6.0
+    dev: false
+
+  /scule@1.1.1:
+    resolution: {integrity: sha512-sHtm/SsIK9BUBI3EFT/Gnp9VoKfY6QLvlkvAE6YK7454IF8FSgJEAnJpVdSC7K5/pjI5NfxhzBLW2JAfYA/shQ==}
     dev: false
 
   /semver@5.7.2:

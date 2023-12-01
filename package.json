@@ -51,8 +51,8 @@
     "vitest": "^0.34.6"
   },
   "dependencies": {
-    "camelcase": "^6.3.0",
-    "eslint-config-nirtamir2": "^0.0.57"
+    "eslint-config-nirtamir2": "^0.0.57",
+    "scule": "^1.1.1"
   },
   "peerDependencies": {
     "eslint": ">=8.0.0",
