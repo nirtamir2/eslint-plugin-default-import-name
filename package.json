@@ -1,6 +1,6 @@
 {
   "name": "eslint-plugin-default-import-name",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "ESLint rule: enforce default imports matching file names",
   "keywords": [
     "eslint",
