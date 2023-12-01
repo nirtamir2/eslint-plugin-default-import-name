@@ -1,5 +1,11 @@
 # eslint-plugin-default-import-name
 
+## 0.1.0
+
+### Minor Changes
+
+- 7931c16: Use scule instead of camelcase
+
 ## 0.0.2
 
 ### Patch Changes
