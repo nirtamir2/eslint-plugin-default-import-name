@@ -1,5 +1,11 @@
 # eslint-plugin-default-import-name
 
+## 0.2.0
+
+### Major Changes
+
+- 380ff1e - renew plugin
+
 ## 0.1.0
 
 ### Minor Changes
