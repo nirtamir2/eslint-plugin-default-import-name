@@ -1,13 +1,14 @@
 import rule, { RULE_NAME } from "./default-import-name.js";
 import { run } from "./_test";
+import { any as ts } from "code-tag";
 
 run({
   name: RULE_NAME,
   rule,
   invalid: [
     {
-      code: `import B from "./A.astro";`,
-      output: `import A from "./A.astro";`,
+      code: ts`import B from "./A.astro";`,
+      output: ts`import A from "./A.astro";`,
       errors: [
         {
           messageId: "unmatchedDefaultImportName",
@@ -20,8 +21,8 @@ run({
       ],
     },
     {
-      code: `import user from "./get-user.ts";`,
-      output: `import getUser from "./get-user.ts";`,
+      code: ts`import user from "./get-user.ts";`,
+      output: ts`import getUser from "./get-user.ts";`,
       errors: [
         {
           messageId: "unmatchedDefaultImportName",
@@ -34,8 +35,8 @@ run({
       ],
     },
     {
-      code: `import account from "./user";`,
-      output: `import user from "./user";`,
+      code: ts`import account from "./user";`,
+      output: ts`import user from "./user";`,
       errors: [
         {
           messageId: "unmatchedDefaultImportName",
@@ -48,8 +49,8 @@ run({
       ],
     },
     {
-      code: `import B from "@/A.astro";`,
-      output: `import A from "@/A.astro";`,
+      code: ts`import B from "@/A.astro";`,
+      output: ts`import A from "@/A.astro";`,
       errors: [
         {
           messageId: "unmatchedDefaultImportName",
@@ -62,8 +63,8 @@ run({
       ],
     },
     {
-      code: `import B from "~/A.astro";`,
-      output: `import A from "~/A.astro";`,
+      code: ts`import B from "~/A.astro";`,
+      output: ts`import A from "~/A.astro";`,
       errors: [
         {
           messageId: "unmatchedDefaultImportName",
@@ -76,8 +77,8 @@ run({
       ],
     },
     {
-      code: `import B from "~/A";`,
-      output: `import A from "~/A";`,
+      code: ts`import B from "~/A";`,
+      output: ts`import A from "~/A";`,
       errors: [
         {
           messageId: "unmatchedDefaultImportName",
@@ -90,8 +91,8 @@ run({
       ],
     },
     {
-      code: `import B from "@/A";`,
-      output: `import A from "@/A";`,
+      code: ts`import B from "@/A";`,
+      output: ts`import A from "@/A";`,
       errors: [
         {
           messageId: "unmatchedDefaultImportName",
@@ -105,21 +106,21 @@ run({
     },
   ],
   valid: [
-    `import A from "./A.astro";`,
+    ts`import A from "./A.astro";`,
     // Should convert files with - to camelCase
-    `import getUser from "./get-user.ts";`,
-    `import getUser from "./get-user";`,
+    ts`import getUser from "./get-user.ts";`,
+    ts`import getUser from "./get-user";`,
     // Should ignore 3rd party libraries
-    `import something from "third-party-library";`,
+    ts`import something from "third-party-library";`,
     // Should ignore css files
-    `import styles from "./a.module.css";`,
+    ts`import styles from "./a.module.css";`,
     // Should still check path alias files
-    `import A from "@/A.astro";`,
-    `import A from "~/A.astro";`,
-    `import A from "~/A";`,
-    `import A from "@/A";`,
+    ts`import A from "@/A.astro";`,
+    ts`import A from "~/A.astro";`,
+    ts`import A from "~/A";`,
+    ts`import A from "@/A";`,
     {
-      code: `import something from "./ignoredSource.astro";`,
+      code: ts`import something from "./ignoredSource.astro";`,
       options: [
         {
           ignoredSourceRegexes: ["ignoredSource.astro$"],
