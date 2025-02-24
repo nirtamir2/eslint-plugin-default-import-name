@@ -1,12 +1,12 @@
-import { createRule } from "../createRule.js";
-import type { BaseModuleSpecifier, ImportDefaultSpecifier } from "estree";
 import { camelCase } from "scule";
+import { createEslintRule } from "../utils";
+import { AST_NODE_TYPES } from "@typescript-eslint/utils";
 
-function isImportDefaultSpecifier(
-  specifier: BaseModuleSpecifier,
-): specifier is ImportDefaultSpecifier {
-  return specifier.type === "ImportDefaultSpecifier";
-}
+export const RULE_NAME = "default-import-name";
+export type MessageIds = "unmatchedDefaultImportName";
+export type Options =
+  | [{ ignoredSourceRegexes: Array<string> | undefined }]
+  | [];
 
 function shouldIgnoreFile({
   sourceImport,
@@ -20,14 +20,14 @@ function shouldIgnoreFile({
   });
 }
 
-export default createRule({
+export default createEslintRule<Options, MessageIds>({
+  name: RULE_NAME,
+  defaultOptions: [],
   meta: {
     type: "problem",
     docs: {
       url: "https://github.com/nirtamir2/eslint-plugin-default-import-name#readme",
       description: "enforce default imports matching file names",
-      category: "Best Practices",
-      recommended: true,
     },
     fixable: "code",
     schema: [
@@ -56,7 +56,6 @@ export default createRule({
 
   create(context) {
     const configExcludedRegexes =
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       (context.options[0]?.ignoredSourceRegexes as Array<string> | undefined) ??
       [];
 
@@ -101,10 +100,11 @@ export default createRule({
           ? camelCase(fileNameWithoutExtension)
           : fileNameWithoutExtension;
 
-        const defaultImport = node.specifiers.find((specifier) =>
-          isImportDefaultSpecifier(specifier),
+        const defaultImport = node.specifiers.find(
+          (specifier) =>
+            specifier.type === AST_NODE_TYPES.ImportDefaultSpecifier,
         );
-        if (defaultImport == null || !isImportDefaultSpecifier(defaultImport)) {
+        if (defaultImport == null) {
           return;
         }
         const actualImportName = defaultImport.local.name;
