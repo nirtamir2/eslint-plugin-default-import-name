@@ -114,6 +114,8 @@ run({
     ts`import something from "third-party-library";`,
     // Should ignore css files
     ts`import styles from "./a.module.css";`,
+    // Should ignore scoped package
+    ts`import A from "@a/b";`,
     // Should still check path alias files
     ts`import A from "@/A.astro";`,
     ts`import A from "~/A.astro";`,

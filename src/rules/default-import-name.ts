@@ -68,6 +68,8 @@ export default createEslintRule<Options, MessageIds>({
        * and not start with "~" or "\@" which are common path alias
        */
       "^(?![@~])[^.]*$",
+      // ignore scoped packages
+      "^@[a-zA-Z0-9-_]+\/[a-zA-Z0-9-_.]+$",
       ...configExcludedRegexes,
     ]);
 
