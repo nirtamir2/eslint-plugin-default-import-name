@@ -3,10 +3,9 @@
 [![npm version][npm-version-src]][npm-version-href]
 [![npm downloads][npm-downloads-src]][npm-downloads-href]
 
-# eslint-plugin-default-import-name
+Enforce default imports matching file names
+This makes default export more structured.
 
-ESLint rule: enforce default imports matching file names
-This makes default export more structured.  
 ![default-import-name-demo.gif](docs%2Fdefault-import-name-demo.gif)
 
 [Rules List](./src/rules)
