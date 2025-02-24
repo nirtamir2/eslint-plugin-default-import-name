@@ -1,7 +1,9 @@
-import rule from "../../rules/default-import-name.js";
-import { ruleTester } from "./ruleTester.js";
+import rule, { RULE_NAME } from "./default-import-name.js";
+import { run } from "./_test";
 
-ruleTester.run("default-import-name", rule, {
+run({
+  name: RULE_NAME,
+  rule,
   invalid: [
     {
       code: `import B from "./A.astro";`,

@@ -1,14 +1,11 @@
+.cache
 .DS_Store
-.nyc_output
+.idea
+*.log
+*.tgz
 coverage
-lib
+dist
+lib-cov
+logs
 node_modules
-npm-debug.log
-
-# @see https://github.com/github/gitignore/blob/main/Global/JetBrains.gitignore
-# User-specific stuff
-.idea/**/workspace.xml
-.idea/**/tasks.xml
-.idea/**/usage.statistics.xml
-.idea/**/dictionaries
-.idea/**/shelf
+temp

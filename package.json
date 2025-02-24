@@ -1,64 +1,106 @@
 {
   "name": "eslint-plugin-default-import-name",
-  "version": "0.0.1",
+  "type": "module",
+  "version": "0.2.0",
+  "packageManager": "pnpm@10.4.0",
   "description": "ESLint rule: enforce default imports matching file names",
+  "author": "Nir Tamir <nirtamir2@gmail.com>",
+  "license": "MIT",
+  "funding": "https://github.com/sponsors/nirtamir2",
+  "homepage": "https://github.com/nirtamir2/eslint-plugin-default-import-name#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nirtamir2/eslint-plugin-default-import-name.git"
+  },
+  "bugs": "https://github.com/nirtamir2/eslint-plugin-default-import-name/issues",
   "keywords": [
     "eslint",
     "eslintplugin",
     "eslint-plugin",
     "import"
   ],
-  "publishConfig": {
-    "access": "public"
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.mts",
+      "default": "./dist/index.mjs"
+    },
+    "./config": {
+      "types": "./dist/config.d.mts",
+      "default": "./dist/config.mjs"
+    },
+    "./types": {
+      "types": "./dist/types.d.mts",
+      "default": "./dist/types.mjs"
+    }
   },
-  "author": "Nir Tamir <nirtamir2@gmail.com>",
-  "license": "MIT",
-  "main": "lib/index.js",
-  "homepage": "https://github.com/nirtamir2/eslint-plugin-default-import-name#readme",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/nirtamir2/eslint-plugin-default-import-name/issues"
+  "main": "./dist/index.mjs",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "typesVersions": {
+    "*": {
+      "*": [
+        "./dist/index.d.mts",
+        "./dist/*"
+      ],
+      "./config": [
+        "./dist/config.d.mts"
+      ],
+      "./types": [
+        "./dist/types.d.mts"
+      ]
+    }
   },
-  "bugs": {
-    "url": "https://github.com/nirtamir2/eslint-plugin-default-import-name/issues"
-  },
+  "files": [
+    "dist"
+  ],
   "scripts": {
-    "build": "tsc",
-    "lint": "eslint --fix \"src/**/*.{ts,tsx,js,jsx}\"",
-    "lint:eslint-docs": "pnpm run update:eslint-docs",
-    "lint:docs": "markdownlint \"**/*.md\"",
+    "build": "unbuild",
+    "ci": "pnpm run --parallel --aggregate-output \"/^(lint|format|type-check).*/\"",
+    "dev": "unbuild --stub",
+    "format": "prettier \"**/*\" --write --ignore-unknown --log-level silent",
+    "lint": "pnpm run dev && eslint . --fix",
+    "prepare": "simple-git-hooks",
+    "prepublishOnly": "nr build",
+    "release": "bumpp && npm publish",
+    "start": "esno src/index.ts",
     "test": "vitest",
     "type-check": "tsc --noEmit",
-    "update:eslint-docs": "eslint-doc-generator",
-    "format": "prettier --ignore-path .gitignore --write **/*.{ts,md,js,json,yaml,yml}",
-    "changeset:version": "changeset version && pnpm install --no-frozen-lockfile",
-    "changeset:publish": "pnpm run build && changeset publish"
-  },
-  "devDependencies": {
-    "@changesets/cli": "^2.26.2",
-    "@tsconfig/node-lts": "^18.12.5",
-    "@tsconfig/strictest": "^2.0.2",
-    "@types/eslint": "^8.44.7",
-    "@types/estree": "^1.0.5",
-    "@types/node": "^20.10.0",
-    "console-fail-test": "^0.2.3",
-    "eslint": "^8.54.0",
-    "eslint-doc-generator": "^1.6.1",
-    "eslint-plugin-eslint-plugin": "^5.1.1",
-    "markdownlint-cli": "^0.37.0",
-    "prettier": "^3.1.0",
-    "typescript": "^5.3.2",
-    "vitest": "^0.34.6"
-  },
-  "dependencies": {
-    "eslint-config-nirtamir2": "^0.0.57",
-    "scule": "^1.1.1"
+    "typecheck": "tsc --noEmit"
   },
   "peerDependencies": {
-    "eslint": ">=8.0.0",
-    "jsonc-eslint-parser": "^2.0.0"
+    "eslint": "*"
   },
-  "engines": {
-    "node": ">=18.0.0"
+  "dependencies": {
+    "scule": "^1.1.1"
+  },
+  "devDependencies": {
+    "@nirtamir2/eslint-config": "0.0.2-beta.20",
+    "@trivago/prettier-plugin-sort-imports": "^5.2.2",
+    "@types/eslint": "^9.6.1",
+    "@types/node": "^22.13.1",
+    "@typescript-eslint/typescript-estree": "^8.24.0",
+    "@typescript-eslint/utils": "^8.24.0",
+    "bumpp": "^10.0.2",
+    "ci-info": "^4.1.0",
+    "code-tag": "^1.2.0",
+    "eslint": "^9.20.0",
+    "eslint-define-config": "^2.1.0",
+    "eslint-vitest-rule-tester": "^1.1.0",
+    "esno": "^4.8.0",
+    "lint-staged": "^15.4.3",
+    "prettier": "^3.5.0",
+    "prettier-plugin-embed": "^0.4.15",
+    "prettier-plugin-packagejson": "^2.5.8",
+    "simple-git-hooks": "^2.11.1",
+    "typescript": "^5.7.3",
+    "unbuild": "^3.3.1",
+    "vitest": "^3.0.5"
+  },
+  "simple-git-hooks": {
+    "pre-commit": "npx lint-staged"
+  },
+  "lint-staged": {
+    "*": "eslint --fix"
   }
 }
