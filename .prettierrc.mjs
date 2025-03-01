@@ -4,8 +4,6 @@ export default {
     "@trivago/prettier-plugin-sort-imports",
     "prettier-plugin-embed",
   ],
-  // @see https://github.com/tailwindlabs/prettier-plugin-tailwindcss#resolving-your-tailwind-configuration
-  tailwindConfig: "./tailwind.config.ts",
   // @see https://github.com/trivago/prettier-plugin-sort-imports
   importOrder: [
     "^server-only$",
