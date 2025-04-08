@@ -201,7 +201,7 @@ run({
           messageId: "unmatchedDefaultImportName",
           data: {
             fileName: "user",
-            expectedImportName: "user",
+            expectedImportName: "user_1",
             actualImportName: "account",
           },
         },
@@ -227,8 +227,91 @@ run({
           messageId: "unmatchedDefaultImportName",
           data: {
             fileName: "user",
-            expectedImportName: "user",
+            expectedImportName: "user_2",
             actualImportName: "account",
+          },
+        },
+      ],
+    },
+    {
+      description:
+        "Should not ignore import names that ends with _1 caused by conflict fix",
+      code: ts`
+        import user_1 from "./user";
+        const user_1 = {};
+      `,
+      output: ts`
+        import user from "./user";
+        const user = {};
+      `,
+      errors: [
+        {
+          messageId: "unmatchedDefaultImportName",
+          data: {
+            fileName: "user",
+            expectedImportName: "user",
+            actualImportName: "user_1",
+          },
+        },
+      ],
+    },
+    {
+      description:
+        "Should not ignore import names that ends with _2 caused by multiple conflict fix",
+      code: ts`
+        import user_4 from "./user";
+        const user = {};
+        const user_1 = {};
+        const user_2 = {};
+        user_4.a = 1;
+      `,
+      output: ts`
+        import user_3 from "./user";
+        const user = {};
+        const user_1 = {};
+        const user_2 = {};
+        user_3.a = 1;
+      `,
+      errors: [
+        {
+          messageId: "unmatchedDefaultImportName",
+          data: {
+            fileName: "user",
+            expectedImportName: "user_3",
+            actualImportName: "user_4",
+          },
+        },
+      ],
+    },
+    {
+      description: "Fix multiple imports from different locations",
+      code: ts`
+        import a from "./user";
+        import b from "./a/user";
+        a.ab = "ab";
+        b.acc = 1;
+      `,
+      output: ts`
+        import user from "./user";
+        import user_1 from "./a/user";
+        user.ab = "ab";
+        user_1.acc = 1;
+      `,
+      errors: [
+        {
+          messageId: "unmatchedDefaultImportName",
+          data: {
+            fileName: "user",
+            expectedImportName: "user",
+            actualImportName: "a",
+          },
+        },
+        {
+          messageId: "unmatchedDefaultImportName",
+          data: {
+            fileName: "user",
+            expectedImportName: "user",
+            actualImportName: "b",
           },
         },
       ],
@@ -239,11 +322,6 @@ run({
     {
       description: "Should accept correct import name for .astro file",
       code: ts`import A from "./A.astro";`,
-    },
-    {
-      description:
-        "Should ignore import names that ends with _ and number because this is how we fix when we have conflicts",
-      code: ts`import a_1 from "./a.ts";`,
     },
     {
       description: "Should accept correct import name for .ts file",
@@ -375,7 +453,7 @@ run({
           messageId: "unmatchedDefaultImportName",
           data: {
             fileName: "A.astro",
-            expectedImportName: "A",
+            expectedImportName: "A_1",
             actualImportName: "B",
           },
         },

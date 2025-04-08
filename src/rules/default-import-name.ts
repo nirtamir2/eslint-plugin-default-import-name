@@ -1,14 +1,13 @@
 import { camelCase } from "scule";
 import { createEslintRule } from "../utils";
 import { AST_NODE_TYPES, AST_TOKEN_TYPES } from "@typescript-eslint/utils";
+import type { RuleContext } from "@typescript-eslint/utils/ts-eslint";
 
 export const RULE_NAME = "default-import-name";
 export type MessageIds = "unmatchedDefaultImportName";
 export type Options =
   | [{ ignoredSourceRegexes: Array<string> | undefined }]
   | [];
-
-const REG_EXP_ENDS_WITH_UNDERLINE_NUMBER = /_\d+$/;
 
 function shouldIgnoreFile({
   sourceImport,
@@ -96,14 +95,6 @@ export default createEslintRule<Options, MessageIds>({
           return;
         }
 
-        const fileNameWithoutExtension = fileName.includes(".")
-          ? fileName.split(".").slice(0, -1).join(".")
-          : fileName;
-
-        const expectedImportName = fileNameWithoutExtension.includes("-")
-          ? camelCase(fileNameWithoutExtension)
-          : fileNameWithoutExtension;
-
         const defaultImport = node.specifiers.find(
           (specifier) =>
             specifier.type === AST_NODE_TYPES.ImportDefaultSpecifier,
@@ -112,10 +103,14 @@ export default createEslintRule<Options, MessageIds>({
           return;
         }
         const actualImportName = defaultImport.local.name;
-        if (
-          actualImportName !== expectedImportName &&
-          !REG_EXP_ENDS_WITH_UNDERLINE_NUMBER.test(actualImportName)
-        ) {
+
+        const expectedImportName = getExpectedImportNameWithoutConflicts({
+          context,
+          actualImportName,
+          fileName,
+        });
+
+        if (actualImportName !== expectedImportName) {
           context.report({
             node,
             messageId: "unmatchedDefaultImportName",
@@ -129,25 +124,6 @@ export default createEslintRule<Options, MessageIds>({
 
               const { sourceCode } = context;
 
-              // Check for variable name conflicts
-              const existingVariables = new Set(
-                sourceCode.ast.tokens
-                  .filter(
-                    (token) =>
-                      (token.type === AST_TOKEN_TYPES.Identifier ||
-                        token.type === AST_TOKEN_TYPES.JSXIdentifier) &&
-                      token.value !== actualImportName,
-                  )
-                  .map((token) => token.value),
-              );
-
-              let newImportName = expectedImportName;
-              let suffix = 1;
-              while (existingVariables.has(newImportName)) {
-                newImportName = `${expectedImportName}_${suffix}`;
-                suffix++;
-              }
-
               // Find all references to this import
               const references = sourceCode.ast.tokens.filter((token) => {
                 return (
@@ -160,7 +136,7 @@ export default createEslintRule<Options, MessageIds>({
               // Add fixes for all references
               for (const reference of references) {
                 fixes.push(
-                  fixer.replaceTextRange(reference.range, newImportName),
+                  fixer.replaceTextRange(reference.range, expectedImportName),
                 );
               }
 
@@ -172,3 +148,40 @@ export default createEslintRule<Options, MessageIds>({
     };
   },
 });
+
+function getExpectedImportNameWithoutConflicts({
+  context,
+  actualImportName,
+  fileName,
+}: {
+  context: RuleContext<MessageIds, Options>;
+  actualImportName: string;
+  fileName: string;
+}) {
+  const fileNameWithoutExtension = fileName.includes(".")
+    ? fileName.split(".").slice(0, -1).join(".")
+    : fileName;
+
+  const expectedImportName = fileNameWithoutExtension.includes("-")
+    ? camelCase(fileNameWithoutExtension)
+    : fileNameWithoutExtension;
+
+  const existingVariables = new Set(
+    context.sourceCode.ast.tokens
+      .filter(
+        (token) =>
+          (token.type === AST_TOKEN_TYPES.Identifier ||
+            token.type === AST_TOKEN_TYPES.JSXIdentifier) &&
+          token.value !== actualImportName,
+      )
+      .map((token) => token.value),
+  );
+
+  let newImportName = expectedImportName;
+  let suffix = 1;
+  while (existingVariables.has(newImportName)) {
+    newImportName = `${expectedImportName}_${suffix}`;
+    suffix++;
+  }
+  return newImportName;
+}
