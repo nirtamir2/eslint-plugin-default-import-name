@@ -39,8 +39,7 @@ run({
       ],
     },
     {
-      description:
-        "Should rename import to match simple file name without extension",
+      description: "Should rename import to match file name without extension",
       code: ts`import account from "./user";`,
       output: ts`import user from "./user";`,
       errors: [
@@ -134,7 +133,7 @@ run({
       ],
     },
 
-    // Usage reference tests
+    // Variable usage tests
     {
       description: "Should rename import and all its usages in the code",
       code: ts`
@@ -284,7 +283,7 @@ run({
       ],
     },
     {
-      description: "Fix multiple imports from different locations",
+      description: "Should handle multiple imports from different locations",
       code: ts`
         import a from "./user";
         import b from "./a/user";
@@ -432,34 +431,6 @@ run({
       ],
     },
     {
-      description:
-        "Should rename import and its usages if we have multiple conflicts",
-      code: tsx`
-        import B from "~/A.astro";
-        import A from "~/good/A.astro";
-        <B prop1="value">
-          <A>Child</A>
-        </B>;
-      `,
-      output: tsx`
-        import A_1 from "~/A.astro";
-        import A from "~/good/A.astro";
-        <A_1 prop1="value">
-          <A>Child</A>
-        </A_1>;
-      `,
-      errors: [
-        {
-          messageId: "unmatchedDefaultImportName",
-          data: {
-            fileName: "A.astro",
-            expectedImportName: "A_1",
-            actualImportName: "B",
-          },
-        },
-      ],
-    },
-    {
       description: "Should rename JSX component with props and children",
       code: tsx`
         import B from "~/A.astro";
@@ -479,6 +450,33 @@ run({
           data: {
             fileName: "A.astro",
             expectedImportName: "A",
+            actualImportName: "B",
+          },
+        },
+      ],
+    },
+    {
+      description: "Should handle JSX component conflicts",
+      code: tsx`
+        import B from "~/A.astro";
+        import A from "~/another/A.astro";
+        <B prop1="value">
+          <A>Child</A>
+        </B>;
+      `,
+      output: tsx`
+        import A_1 from "~/A.astro";
+        import A from "~/another/A.astro";
+        <A_1 prop1="value">
+          <A>Child</A>
+        </A_1>;
+      `,
+      errors: [
+        {
+          messageId: "unmatchedDefaultImportName",
+          data: {
+            fileName: "A.astro",
+            expectedImportName: "A_1",
             actualImportName: "B",
           },
         },
