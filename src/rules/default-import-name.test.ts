@@ -8,6 +8,7 @@ run({
   rule,
   invalid: [
     {
+      description: "Should rename import to match .astro file name",
       code: ts`import B from "./A.astro";`,
       output: ts`import A from "./A.astro";`,
       errors: [
@@ -22,6 +23,7 @@ run({
       ],
     },
     {
+      description: "Should convert kebab-case file name to camelCase import",
       code: ts`import user from "./get-user.ts";`,
       output: ts`import getUser from "./get-user.ts";`,
       errors: [
@@ -36,6 +38,7 @@ run({
       ],
     },
     {
+      description: "Should rename import to match simple file name",
       code: ts`import account from "./user";`,
       output: ts`import user from "./user";`,
       errors: [
@@ -50,7 +53,7 @@ run({
       ],
     },
     {
-      description: "Fix multiple references",
+      description: "Should rename import and all its usages in the code",
       code: ts`
         import account from "./user";
         account.a;
@@ -75,6 +78,7 @@ run({
       ],
     },
     {
+      description: "Should handle path alias imports with @ prefix",
       code: ts`import B from "@/A.astro";`,
       output: ts`import A from "@/A.astro";`,
       errors: [
@@ -89,6 +93,7 @@ run({
       ],
     },
     {
+      description: "Should handle path alias imports with ~ prefix",
       code: ts`import B from "~/A.astro";`,
       output: ts`import A from "~/A.astro";`,
       errors: [
@@ -103,6 +108,7 @@ run({
       ],
     },
     {
+      description: "Should handle path alias imports without extension",
       code: ts`import B from "~/A";`,
       output: ts`import A from "~/A";`,
       errors: [
@@ -117,6 +123,7 @@ run({
       ],
     },
     {
+      description: "Should handle @ path alias imports without extension",
       code: ts`import B from "@/A";`,
       output: ts`import A from "@/A";`,
       errors: [
@@ -132,22 +139,48 @@ run({
     },
   ],
   valid: [
-    ts`import A from "./A.astro";`,
-    // Should convert files with - to camelCase
-    ts`import getUser from "./get-user.ts";`,
-    ts`import getUser from "./get-user";`,
-    // Should ignore 3rd party libraries
-    ts`import something from "third-party-library";`,
-    // Should ignore css files
-    ts`import styles from "./a.module.css";`,
-    // Should ignore scoped package
-    ts`import A from "@a/b";`,
-    // Should still check path alias files
-    ts`import A from "@/A.astro";`,
-    ts`import A from "~/A.astro";`,
-    ts`import A from "~/A";`,
-    ts`import A from "@/A";`,
     {
+      description: "Should accept correct import name for .astro file",
+      code: ts`import A from "./A.astro";`,
+    },
+    {
+      description: "Should accept camelCase import for kebab-case file name",
+      code: ts`import getUser from "./get-user.ts";`,
+    },
+    {
+      description: "Should accept camelCase import for kebab-case file name without extension",
+      code: ts`import getUser from "./get-user";`,
+    },
+    {
+      description: "Should ignore third-party library imports",
+      code: ts`import something from "third-party-library";`,
+    },
+    {
+      description: "Should ignore CSS module imports",
+      code: ts`import styles from "./a.module.css";`,
+    },
+    {
+      description: "Should ignore scoped package imports",
+      code: ts`import A from "@a/b";`,
+    },
+    {
+      description: "Should check path alias imports with @ prefix",
+      code: ts`import A from "@/A.astro";`,
+    },
+    {
+      description: "Should check path alias imports with ~ prefix",
+      code: ts`import A from "~/A.astro";`,
+    },
+    {
+      description: "Should check path alias imports without extension",
+      code: ts`import A from "~/A";`,
+    },
+    {
+      description: "Should check @ path alias imports without extension",
+      code: ts`import A from "@/A";`,
+    },
+    {
+      description: "Should ignore files matching ignoredSourceRegexes option",
       code: ts`import something from "./ignoredSource.astro";`,
       options: [
         {
@@ -174,7 +207,7 @@ run({
   },
   invalid: [
     {
-      description: "jsx support",
+      description: "Should rename JSX component imports and usages",
       code: tsx`
         import B from "~/A.astro";
         <B />;
