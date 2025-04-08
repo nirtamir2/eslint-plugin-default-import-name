@@ -135,7 +135,7 @@ export default createEslintRule<Options, MessageIds>({
                 })
                 .map((token) => {
                   return {
-                    range: [token.range[0], token.range[1]] as const,
+                    range: token.range,
                     text: expectedImportName,
                   };
                 });
