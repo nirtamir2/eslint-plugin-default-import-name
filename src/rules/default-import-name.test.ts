@@ -1,6 +1,7 @@
 import rule, { RULE_NAME } from "./default-import-name.js";
 import { run } from "./_test";
-import { any as ts } from "code-tag";
+import { any as ts, any as tsx } from "code-tag";
+import typescriptEslintParser from "@typescript-eslint/parser";
 
 run({
   name: RULE_NAME,
@@ -151,6 +152,47 @@ run({
       options: [
         {
           ignoredSourceRegexes: ["ignoredSource.astro$"],
+        },
+      ],
+    },
+  ],
+});
+
+run({
+  name: RULE_NAME,
+  rule,
+  languageOptions: {
+    parser: typescriptEslintParser,
+    parserOptions: {
+      projectService: true,
+      project: "./tsconfig.json",
+      tsconfigRootDir: `${import.meta.dirname}/fixtures-jsx`,
+      ecmaFeatures: {
+        jsx: true,
+      },
+    },
+  },
+  invalid: [
+    {
+      description: "jsx support",
+      code: tsx`
+        import B from "~/A.astro";
+        <B />;
+        <B a="a" />;
+      `,
+      output: tsx`
+        import A from "~/A.astro";
+        <A />;
+        <A a="a" />;
+      `,
+      errors: [
+        {
+          messageId: "unmatchedDefaultImportName",
+          data: {
+            fileName: "A.astro",
+            expectedImportName: "A",
+            actualImportName: "B",
+          },
         },
       ],
     },

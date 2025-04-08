@@ -79,6 +79,7 @@
     "@trivago/prettier-plugin-sort-imports": "^5.2.2",
     "@types/eslint": "^9.6.1",
     "@types/node": "^22.13.1",
+    "@typescript-eslint/parser": "^8.29.1",
     "@typescript-eslint/typescript-estree": "^8.24.0",
     "@typescript-eslint/utils": "^8.24.0",
     "bumpp": "^10.0.2",

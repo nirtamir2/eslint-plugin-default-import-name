@@ -128,7 +128,8 @@ export default createEslintRule<Options, MessageIds>({
               const references = sourceCode.ast.tokens
                 .filter((token) => {
                   return (
-                    token.type === AST_TOKEN_TYPES.Identifier &&
+                    (token.type === AST_TOKEN_TYPES.Identifier ||
+                      token.type === AST_TOKEN_TYPES.JSXIdentifier) &&
                     token.value === actualImportName
                   );
                 })
