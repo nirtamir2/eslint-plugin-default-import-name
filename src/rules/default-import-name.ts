@@ -1,6 +1,6 @@
 import { camelCase } from "scule";
 import { createEslintRule } from "../utils";
-import { AST_NODE_TYPES } from "@typescript-eslint/utils";
+import { AST_NODE_TYPES, AST_TOKEN_TYPES } from "@typescript-eslint/utils";
 
 export const RULE_NAME = "default-import-name";
 export type MessageIds = "unmatchedDefaultImportName";
@@ -120,7 +120,33 @@ export default createEslintRule<Options, MessageIds>({
               expectedImportName,
             },
             fix(fixer) {
-              return fixer.replaceText(defaultImport, expectedImportName);
+              const fixes = [];
+
+              const { sourceCode } = context;
+
+              // Find all references to this import
+              const references = sourceCode.ast.tokens
+                .filter((token) => {
+                  return (
+                    token.type === AST_TOKEN_TYPES.Identifier &&
+                    token.value === actualImportName
+                  );
+                })
+                .map((token) => {
+                  return {
+                    range: [token.range[0], token.range[1]] as const,
+                    text: expectedImportName,
+                  };
+                });
+
+              // Add fixes for all references
+              for (const reference of references) {
+                fixes.push(
+                  fixer.replaceTextRange(reference.range, reference.text),
+                );
+              }
+
+              return fixes;
             },
           });
         }

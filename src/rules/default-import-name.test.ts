@@ -49,6 +49,31 @@ run({
       ],
     },
     {
+      description: "Fix multiple references",
+      code: ts`
+        import account from "./user";
+        account.a;
+        account.b;
+        account();
+      `,
+      output: ts`
+        import user from "./user";
+        user.a;
+        user.b;
+        user();
+      `,
+      errors: [
+        {
+          messageId: "unmatchedDefaultImportName",
+          data: {
+            fileName: "user",
+            expectedImportName: "user",
+            actualImportName: "account",
+          },
+        },
+      ],
+    },
+    {
       code: ts`import B from "@/A.astro";`,
       output: ts`import A from "@/A.astro";`,
       errors: [
