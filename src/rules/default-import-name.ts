@@ -1,6 +1,7 @@
 import { camelCase } from "scule";
 import { createEslintRule } from "../utils";
-import { AST_NODE_TYPES } from "@typescript-eslint/utils";
+import { AST_NODE_TYPES, AST_TOKEN_TYPES } from "@typescript-eslint/utils";
+import type { RuleContext } from "@typescript-eslint/utils/ts-eslint";
 
 export const RULE_NAME = "default-import-name";
 export type MessageIds = "unmatchedDefaultImportName";
@@ -94,14 +95,6 @@ export default createEslintRule<Options, MessageIds>({
           return;
         }
 
-        const fileNameWithoutExtension = fileName.includes(".")
-          ? fileName.split(".").slice(0, -1).join(".")
-          : fileName;
-
-        const expectedImportName = fileNameWithoutExtension.includes("-")
-          ? camelCase(fileNameWithoutExtension)
-          : fileNameWithoutExtension;
-
         const defaultImport = node.specifiers.find(
           (specifier) =>
             specifier.type === AST_NODE_TYPES.ImportDefaultSpecifier,
@@ -110,6 +103,13 @@ export default createEslintRule<Options, MessageIds>({
           return;
         }
         const actualImportName = defaultImport.local.name;
+
+        const expectedImportName = getExpectedImportNameWithoutConflicts({
+          context,
+          actualImportName,
+          fileName,
+        });
+
         if (actualImportName !== expectedImportName) {
           context.report({
             node,
@@ -120,7 +120,27 @@ export default createEslintRule<Options, MessageIds>({
               expectedImportName,
             },
             fix(fixer) {
-              return fixer.replaceText(defaultImport, expectedImportName);
+              const fixes = [];
+
+              const { sourceCode } = context;
+
+              // Find all references to this import
+              const references = sourceCode.ast.tokens.filter((token) => {
+                return (
+                  (token.type === AST_TOKEN_TYPES.Identifier ||
+                    token.type === AST_TOKEN_TYPES.JSXIdentifier) &&
+                  token.value === actualImportName
+                );
+              });
+
+              // Add fixes for all references
+              for (const reference of references) {
+                fixes.push(
+                  fixer.replaceTextRange(reference.range, expectedImportName),
+                );
+              }
+
+              return fixes;
             },
           });
         }
@@ -128,3 +148,40 @@ export default createEslintRule<Options, MessageIds>({
     };
   },
 });
+
+function getExpectedImportNameWithoutConflicts({
+  context,
+  actualImportName,
+  fileName,
+}: {
+  context: RuleContext<MessageIds, Options>;
+  actualImportName: string;
+  fileName: string;
+}) {
+  const fileNameWithoutExtension = fileName.includes(".")
+    ? fileName.split(".").slice(0, -1).join(".")
+    : fileName;
+
+  const expectedImportName = fileNameWithoutExtension.includes("-")
+    ? camelCase(fileNameWithoutExtension)
+    : fileNameWithoutExtension;
+
+  const existingVariables = new Set(
+    context.sourceCode.ast.tokens
+      .filter(
+        (token) =>
+          (token.type === AST_TOKEN_TYPES.Identifier ||
+            token.type === AST_TOKEN_TYPES.JSXIdentifier) &&
+          token.value !== actualImportName,
+      )
+      .map((token) => token.value),
+  );
+
+  let newImportName = expectedImportName;
+  let suffix = 1;
+  while (existingVariables.has(newImportName)) {
+    newImportName = `${expectedImportName}_${suffix}`;
+    suffix++;
+  }
+  return newImportName;
+}
