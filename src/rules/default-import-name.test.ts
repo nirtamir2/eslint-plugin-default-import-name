@@ -1,7 +1,8 @@
 import rule, { RULE_NAME } from "./default-import-name.js";
 import { run } from "./_test";
-import { any as ts, any as tsx } from "code-tag";
+import { any as astro, any as ts, any as tsx } from "code-tag";
 import typescriptEslintParser from "@typescript-eslint/parser";
+import astroEslintParser from "astro-eslint-parser";
 
 run({
   name: RULE_NAME,
@@ -478,6 +479,45 @@ run({
             fileName: "A.astro",
             expectedImportName: "A_1",
             actualImportName: "B",
+          },
+        },
+      ],
+    },
+  ],
+});
+
+run({
+  name: RULE_NAME,
+  rule,
+  languageOptions: {
+    parser: astroEslintParser,
+  },
+  invalid: [
+    {
+      description: "Astro",
+      code: astro`---
+import Blog from "../../layouts/ArticleLayout.astro";
+---
+
+<Blog>
+  test
+</Blog>
+`,
+      output: astro`---
+import ArticleLayout from "../../layouts/ArticleLayout.astro";
+---
+
+<ArticleLayout>
+  test
+</ArticleLayout>
+`,
+      errors: [
+        {
+          messageId: "unmatchedDefaultImportName",
+          data: {
+            fileName: "ArticleLayout.astro",
+            expectedImportName: "ArticleLayout",
+            actualImportName: "Blog",
           },
         },
       ],
