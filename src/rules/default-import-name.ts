@@ -8,6 +8,8 @@ export type Options =
   | [{ ignoredSourceRegexes: Array<string> | undefined }]
   | [];
 
+const REG_EXP_ENDS_WITH_UNDERLINE_NUMBER = /_\d+$/;
+
 function shouldIgnoreFile({
   sourceImport,
   ignoredSourceRegexes,
@@ -110,7 +112,10 @@ export default createEslintRule<Options, MessageIds>({
           return;
         }
         const actualImportName = defaultImport.local.name;
-        if (actualImportName !== expectedImportName) {
+        if (
+          actualImportName !== expectedImportName &&
+          !REG_EXP_ENDS_WITH_UNDERLINE_NUMBER.test(actualImportName)
+        ) {
           context.report({
             node,
             messageId: "unmatchedDefaultImportName",
@@ -124,26 +129,38 @@ export default createEslintRule<Options, MessageIds>({
 
               const { sourceCode } = context;
 
+              // Check for variable name conflicts
+              const existingVariables = new Set(
+                sourceCode.ast.tokens
+                  .filter(
+                    (token) =>
+                      (token.type === AST_TOKEN_TYPES.Identifier ||
+                        token.type === AST_TOKEN_TYPES.JSXIdentifier) &&
+                      token.value !== actualImportName,
+                  )
+                  .map((token) => token.value),
+              );
+
+              let newImportName = expectedImportName;
+              let suffix = 1;
+              while (existingVariables.has(newImportName)) {
+                newImportName = `${expectedImportName}_${suffix}`;
+                suffix++;
+              }
+
               // Find all references to this import
-              const references = sourceCode.ast.tokens
-                .filter((token) => {
-                  return (
-                    (token.type === AST_TOKEN_TYPES.Identifier ||
-                      token.type === AST_TOKEN_TYPES.JSXIdentifier) &&
-                    token.value === actualImportName
-                  );
-                })
-                .map((token) => {
-                  return {
-                    range: token.range,
-                    text: expectedImportName,
-                  };
-                });
+              const references = sourceCode.ast.tokens.filter((token) => {
+                return (
+                  (token.type === AST_TOKEN_TYPES.Identifier ||
+                    token.type === AST_TOKEN_TYPES.JSXIdentifier) &&
+                  token.value === actualImportName
+                );
+              });
 
               // Add fixes for all references
               for (const reference of references) {
                 fixes.push(
-                  fixer.replaceTextRange(reference.range, reference.text),
+                  fixer.replaceTextRange(reference.range, newImportName),
                 );
               }
 

@@ -185,17 +185,42 @@ run({
       ],
     },
     {
-      skip: true,
-      description: "Should rename import and its usages in type annotations",
+      description: "Should rename import and its usages if we have conflict",
       code: ts`
         import account from "./user";
-        type User = account.User;
-        const user: account.User = {};
+        const user = {};
+        account.a;
       `,
       output: ts`
-        import user from "./user";
-        type User = user.User;
-        const userObj: user.User = {};
+        import user_1 from "./user";
+        const user = {};
+        user_1.a;
+      `,
+      errors: [
+        {
+          messageId: "unmatchedDefaultImportName",
+          data: {
+            fileName: "user",
+            expectedImportName: "user",
+            actualImportName: "account",
+          },
+        },
+      ],
+    },
+    {
+      description:
+        "Should rename import and its usages if we have multiple conflicts",
+      code: ts`
+        import account from "./user";
+        const user = {};
+        const user_1 = {};
+        account.a;
+      `,
+      output: ts`
+        import user_2 from "./user";
+        const user = {};
+        const user_1 = {};
+        user_2.a;
       `,
       errors: [
         {
@@ -214,6 +239,11 @@ run({
     {
       description: "Should accept correct import name for .astro file",
       code: ts`import A from "./A.astro";`,
+    },
+    {
+      description:
+        "Should ignore import names that ends with _ and number because this is how we fix when we have conflicts",
+      code: ts`import a_1 from "./a.ts";`,
     },
     {
       description: "Should accept correct import name for .ts file",
@@ -311,6 +341,34 @@ run({
         import A from "~/A.astro";
         <A />;
         <A a="a" />;
+      `,
+      errors: [
+        {
+          messageId: "unmatchedDefaultImportName",
+          data: {
+            fileName: "A.astro",
+            expectedImportName: "A",
+            actualImportName: "B",
+          },
+        },
+      ],
+    },
+    {
+      description:
+        "Should rename import and its usages if we have multiple conflicts",
+      code: tsx`
+        import B from "~/A.astro";
+        import A from "~/good/A.astro";
+        <B prop1="value">
+          <A>Child</A>
+        </B>;
+      `,
+      output: tsx`
+        import A_1 from "~/A.astro";
+        import A from "~/good/A.astro";
+        <A_1 prop1="value">
+          <A>Child</A>
+        </A_1>;
       `,
       errors: [
         {
