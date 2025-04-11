@@ -1,7 +1,7 @@
 {
   "name": "eslint-plugin-default-import-name",
   "type": "module",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "packageManager": "pnpm@10.4.0",
   "description": "ESLint rule: enforce default imports matching file names",
   "author": "Nir Tamir <nirtamir2@gmail.com>",
