@@ -26,15 +26,15 @@ By default, the rule includes these mappings:
 ```json
 {
   "mapImportPathToName": {
-    // Default mapping for files with kebab-case
+    // Kebab-case files to camelCase
     ".*/[a-z0-9]+(-[a-z0-9]+)+(.[a-z0-9]+)?$": "${value|camelcase}",
-    // Astro files
+    // Astro files to PascalCase
     ".*.astro": "${value|pascalcase}",
-    // React files
+    // React files to PascalCase
     ".*.tsx": "${value|pascalcase}",
-    // CSS files
+    // CSS files to 'styles'
     ".*.css": "styles",
-    // SVG files
+    // SVG files to camelCase with Src suffix
     ".*.svg": "${value|camelcase}Src"
   }
 }
@@ -123,31 +123,15 @@ import user from "./user.ts"; // ❌ Incorrect
 ```json
 {
   "mapImportPathToName": {
-    ".*\\.ts$": "use${value|pascalcase}"
+    "\\/hooks\\/.*\\.ts$": "use${value|pascalcase}"
   }
 }
 ```
 
 ```typescript
-// File: user.ts
-import useUser from "./user.ts"; // ✅ Correct
-import user from "./user.ts"; // ❌ Incorrect
-```
-
-5. **Multiple Transformations**
-
-```json
-{
-  "mapImportPathToName": {
-    "get-.*\\.ts$": "${value|snakecase|uppercase}"
-  }
-}
-```
-
-```typescript
-// File: get-user.ts
-import GET_USER from "./get-user.ts"; // ✅ Correct
-import user from "./get-user.ts"; // ❌ Incorrect
+// File: hooks/user.ts
+import useUser from "./hooks/user.ts"; // ✅ Correct
+import user from "./hooks/user.ts"; // ❌ Incorrect
 ```
 
 ### Multiple Patterns
@@ -157,14 +141,59 @@ When multiple patterns match a file, the last will be used. For example:
 ```json
 {
   "mapImportPathToName": {
-    ".*\\.ts$": "notUse{value|pascalcase}",
-    "get-.*\\.ts$": "use${value|pascalcase}"
+    ".*\\.ts$": "notUse${value|pascalcase}",
+    "\\/hooks\\/.*\\.ts$": "use${value|pascalcase}"
   }
 }
 ```
 
 ```typescript
-// File: get-user.ts
+// File: hooks/get-user.ts
 import useGetUser from "./hooks/get-user.ts"; // ✅ Correct
 import getUser from "./hooks/get-user.ts"; // ❌ Incorrect
+```
+
+## `ignoredSourceRegexes`
+
+The `ignoredSourceRegexes` option allows you to specify patterns for import sources that should be ignored by the rule.
+
+### Default Configuration
+
+By default, the rule ignores:
+
+```json
+{
+  "ignoredSourceRegexes": [
+    // Third party modules that are not path alias
+    "^(?![@~])[^.]*$",
+    // Scoped packages
+    "^@[a-zA-Z0-9-_]+/[a-zA-Z0-9-_.]+$"
+  ]
+}
+```
+
+### Examples
+
+1. **Ignore Specific Files**
+
+```json
+{
+  "ignoredSourceRegexes": ["ignoredSource.astro$"]
+}
+```
+
+```typescript
+import something from "./ignoredSource.astro"; // ✅ Ignored
+```
+
+2. **Ignore Third-party Libraries**
+
+```json
+{
+  "ignoredSourceRegexes": ["^third-party-lib"]
+}
+```
+
+```typescript
+import something from "third-party-lib"; // ✅ Ignored
 ```
