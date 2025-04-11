@@ -38,12 +38,12 @@ The string template format supports:
 
 - `${value}` - The original file name without extension
 - Pipes for transformations:
-  - `pascalcase` - Convert to PascalCase
-  - `camelcase` - Convert to camelCase
-  - `snakecase` - Convert to snake_case
-  - `kebabcase` - Convert to kebab-case
-  - `uppercase` - Convert to UPPERCASE
-  - `lowercase` - Convert to lowercase
+  - `pascalcase` - Convert to PascalCase (`foo-barBaz` => `FooBarBaz`)
+  - `camelcase` - Convert to camelCase (`foo-barBaz` => `fooBarBaz`)
+  - `snakecase` - Convert to snake_case (`foo-barBaz` => `foo_bar_baz`)
+  - `uppercase` - Convert to UPPERCASE (`foo-barBaz` => `FOO-BARBAZ`)
+  - `lowercase` - Convert to lowercase (`foo-barBaz` => `foo-barbaz`)
+  - `flatcase` - Convert to flatcase (without delimiters like _) (`foo-barBaz` => `foobarbaz`)
 
 ### Examples
 

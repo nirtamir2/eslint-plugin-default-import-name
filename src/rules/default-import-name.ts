@@ -1,4 +1,4 @@
-import { camelCase, flatCase, kebabCase, pascalCase, snakeCase } from "scule";
+import { camelCase, flatCase, pascalCase, snakeCase } from "scule";
 import { createEslintRule } from "../utils";
 import { AST_NODE_TYPES, AST_TOKEN_TYPES } from "@typescript-eslint/utils";
 import type { RuleContext } from "@typescript-eslint/utils/ts-eslint";
@@ -182,7 +182,6 @@ function transformSnippetText(snippetText: string, value: string): string {
   const pipeFunctions = {
     pascalcase: (val: string) => pascalCase(val),
     camelcase: (val: string) => camelCase(val),
-    kebabcase: (val: string) => kebabCase(val),
     snakecase: (val: string) => snakeCase(val),
     flatcase: (val: string) => flatCase(val),
     uppercase: (val: string) => val.toUpperCase(),
