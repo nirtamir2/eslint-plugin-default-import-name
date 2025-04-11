@@ -110,6 +110,28 @@ run({
       ],
     },
     {
+      description: "Should convert SVG files to camelCase with Src suffix",
+      code: ts`import logo from "./user-logo.svg";`,
+      output: ts`import userLogoSrc from "./user-logo.svg";`,
+      options: [
+        {
+          mapImportPathToName: {
+            "\\.svg$": "${value|camelcase}Src",
+          },
+        },
+      ],
+      errors: [
+        {
+          messageId: "unmatchedDefaultImportName",
+          data: {
+            fileName: "user-logo.svg",
+            expectedImportName: "userLogoSrc",
+            actualImportName: "logo",
+          },
+        },
+      ],
+    },
+    {
       description: "Should apply custom mapping with multiple transformations",
       code: ts`import user from "./get-user.ts";`,
       output: ts`import GET_USER from "./get-user.ts";`,
