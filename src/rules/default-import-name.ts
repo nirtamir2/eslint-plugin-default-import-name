@@ -4,13 +4,15 @@ import { AST_NODE_TYPES, AST_TOKEN_TYPES } from "@typescript-eslint/utils";
 import type { RuleContext } from "@typescript-eslint/utils/ts-eslint";
 import { evaluateStringTemplate } from "string-template-parser";
 
+type ImportPathToNameConfig = Record<string, string>;
+
 export const RULE_NAME = "default-import-name";
 export type MessageIds = "unmatchedDefaultImportName";
 export type Options =
   | [
       {
         ignoredSourceRegexes?: Array<string>;
-        mapImportPathToName?: Record<string, string>;
+        mapImportPathToName?: ImportPathToNameConfig;
       },
     ]
   | [];
@@ -21,22 +23,124 @@ function shouldIgnoreFile({
 }: {
   sourceImport: string;
   ignoredSourceRegexes: Set<string>;
-}) {
+}): boolean {
   return [...ignoredSourceRegexes.values()].some((regex) => {
-    return new RegExp(regex).test(sourceImport);
+    try {
+      return new RegExp(regex).test(sourceImport);
+    } catch (error) {
+      console.warn(`Invalid regex pattern: ${regex}`, error);
+      return false;
+    }
   });
 }
 
-export const defaultImportPathToNameConfig = {
+export const defaultImportPathToNameConfig: ImportPathToNameConfig = {
   // Default mapping for files with kebab-case
-  ".*-.*": "${value|camelcase}",
+  ".*/[a-z0-9]+(-[a-z0-9]+)+(.[a-z0-9]+)?$": "${value|camelcase}",
+  // Astro files
+  ".*.astro": "${value|pascalcase}",
+  // React files
+  ".*.tsx": "${value|pascalcase}",
+  // CSS files
+  ".*.css": "styles",
+  // SVG files
+  ".*.svg": "${value|camelcase}Src",
 };
+
+export const defaultIgnoredSourceRegexes = [
+  /**
+   * Third party modules that are not path alias
+   * File that does not include "."
+   * and not start with "~" or "\@" which are common path alias
+   */
+  "^(?![@~])[^.]*$",
+  // ignore scoped packages
+  "^@[a-zA-Z0-9-_]+\/[a-zA-Z0-9-_.]+$",
+];
+
+const pipeFunctions = {
+  pascalcase: (val: string) => pascalCase(val),
+  camelcase: (val: string) => camelCase(val),
+  snakecase: (val: string) => snakeCase(val),
+  flatcase: (val: string) => flatCase(val),
+  uppercase: (val: string) => val.toUpperCase(),
+  lowercase: (val: string) => val.toLowerCase(),
+} as const;
+
+function transformSnippetText(snippetText: string, value: string): string {
+  try {
+    return evaluateStringTemplate(snippetText, { value }, pipeFunctions);
+  } catch (error) {
+    console.warn(`Failed to transform snippet: ${snippetText}`, error);
+    return value;
+  }
+}
+
+function getFileNameWithoutExtension(fileName: string): string {
+  return fileName.includes(".")
+    ? fileName.split(".").slice(0, -1).join(".")
+    : fileName;
+}
+
+function getExpectedImportNameWithoutConflicts({
+  context,
+  actualImportName,
+  sourceImport,
+  fileName,
+  mappingConfig,
+}: {
+  context: RuleContext<MessageIds, Options>;
+  actualImportName: string;
+  sourceImport: string;
+  fileName: string;
+  mappingConfig: ImportPathToNameConfig;
+}): string {
+  const fileNameWithoutExtension = getFileNameWithoutExtension(fileName);
+  let expectedImportName = fileNameWithoutExtension;
+
+  // Apply mappingConfig if provided
+  for (const [regex, snippet] of Object.entries(mappingConfig).toReversed()) {
+    try {
+      if (new RegExp(regex).test(sourceImport)) {
+        const transformedName = transformSnippetText(
+          snippet,
+          fileNameWithoutExtension,
+        );
+        expectedImportName = transformedName;
+        break;
+      }
+    } catch (error) {
+      console.warn(`Failed to apply regex pattern: ${regex}`, error);
+    }
+  }
+
+  // Handle naming conflicts
+  const existingVariables = new Set(
+    context.sourceCode.ast.tokens
+      .filter(
+        (token) =>
+          (token.type === AST_TOKEN_TYPES.Identifier ||
+            token.type === AST_TOKEN_TYPES.JSXIdentifier) &&
+          token.value !== actualImportName,
+      )
+      .map((token) => token.value),
+  );
+
+  let newImportName = expectedImportName;
+  let suffix = 1;
+  while (existingVariables.has(newImportName)) {
+    newImportName = `${expectedImportName}_${suffix}`;
+    suffix++;
+  }
+  return newImportName;
+}
 
 export default createEslintRule<Options, MessageIds>({
   name: RULE_NAME,
   defaultOptions: [
     {
       mapImportPathToName: defaultImportPathToNameConfig,
+      ignoredSourceRegexes: defaultIgnoredSourceRegexes,
     },
   ],
   meta: {
@@ -52,23 +156,18 @@ export default createEslintRule<Options, MessageIds>({
         properties: {
           ignoredSourceRegexes: {
             description: "List of regexes to ignore import sources",
-            anyOf: [
-              {
-                type: ["array"],
-                items: {
-                  type: ["string"],
-                },
-              },
-            ],
+            type: "array",
+            items: {
+              type: "string",
+            },
           },
           mapImportPathToName: {
             description:
               "Object mapping import path regex to import name template based on the file name",
-            anyOf: [
-              {
-                type: ["object"],
-              },
-            ],
+            type: "object",
+            additionalProperties: {
+              type: "string",
+            },
           },
         },
       },
@@ -81,25 +180,13 @@ export default createEslintRule<Options, MessageIds>({
 
   create(context) {
     const mappingConfig = (context.options[0]?.mapImportPathToName ??
-      defaultImportPathToNameConfig) as Record<string, string>;
+      defaultImportPathToNameConfig) as ImportPathToNameConfig;
 
     const configExcludedRegexes =
       (context.options[0]?.ignoredSourceRegexes as Array<string> | undefined) ??
-      [];
+      defaultIgnoredSourceRegexes;
 
-    const ignoredSourceRegexes = new Set([
-      // ignored file extensions
-      ".css$",
-      /**
-       * Third party modules that are not path alias
-       * File that does not include "."
-       * and not start with "~" or "\@" which are common path alias
-       */
-      "^(?![@~])[^.]*$",
-      // ignore scoped packages
-      "^@[a-zA-Z0-9-_]+\/[a-zA-Z0-9-_.]+$",
-      ...configExcludedRegexes,
-    ]);
+    const ignoredSourceRegexes = new Set(configExcludedRegexes);
 
     return {
       ImportDeclaration(node) {
@@ -177,74 +264,3 @@ export default createEslintRule<Options, MessageIds>({
     };
   },
 });
-
-function transformSnippetText(snippetText: string, value: string): string {
-  const pipeFunctions = {
-    pascalcase: (val: string) => pascalCase(val),
-    camelcase: (val: string) => camelCase(val),
-    snakecase: (val: string) => snakeCase(val),
-    flatcase: (val: string) => flatCase(val),
-    uppercase: (val: string) => val.toUpperCase(),
-    lowercase: (val: string) => val.toLowerCase(),
-  };
-
-  return evaluateStringTemplate(snippetText, { value }, pipeFunctions);
-}
-
-function getExpectedImportNameWithoutConflicts({
-  context,
-  actualImportName,
-  sourceImport,
-  fileName,
-  mappingConfig,
-}: {
-  context: RuleContext<MessageIds, Options>;
-  actualImportName: string;
-  sourceImport: string;
-  fileName: string;
-  mappingConfig: Record<string, string> | null;
-}) {
-  const fileNameWithoutExtension = fileName.includes(".")
-    ? fileName.split(".").slice(0, -1).join(".")
-    : fileName;
-
-  let expectedImportName = fileNameWithoutExtension;
-
-  if (mappingConfig != null) {
-    for (const [regex, snippet] of Object.entries(mappingConfig).toReversed()) {
-      if (new RegExp(regex).test(sourceImport)) {
-        try {
-          // Transform the snippet text with the file name
-          const transformedName = transformSnippetText(
-            snippet,
-            fileNameWithoutExtension,
-          );
-          expectedImportName = transformedName;
-          break; // Use the first matching pattern
-        } catch (error) {
-          // If snippet parsing fails, continue with the original name
-          console.warn(`Failed to parse snippet for ${fileName}:`, error);
-        }
-      }
-    }
-  }
-
-  const existingVariables = new Set(
-    context.sourceCode.ast.tokens
-      .filter(
-        (token) =>
-          (token.type === AST_TOKEN_TYPES.Identifier ||
-            token.type === AST_TOKEN_TYPES.JSXIdentifier) &&
-          token.value !== actualImportName,
-      )
-      .map((token) => token.value),
-  );
-
-  let newImportName = expectedImportName;
-  let suffix = 1;
-  while (existingVariables.has(newImportName)) {
-    newImportName = `${expectedImportName}_${suffix}`;
-    suffix++;
-  }
-  return newImportName;
-}
