@@ -12,6 +12,7 @@ export default nirtamir2(
       rules: {
         "sonarjs/cognitive-complexity": "off",
         "sonarjs/no-empty-test-file": "off",
+        "no-template-curly-in-string": "off"
       },
     },
   ],

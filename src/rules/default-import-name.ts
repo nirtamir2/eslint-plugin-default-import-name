@@ -1,12 +1,18 @@
-import { camelCase } from "scule";
+import { camelCase, pascalCase } from "scule";
 import { createEslintRule } from "../utils";
 import { AST_NODE_TYPES, AST_TOKEN_TYPES } from "@typescript-eslint/utils";
 import type { RuleContext } from "@typescript-eslint/utils/ts-eslint";
+import { evaluateStringTemplate } from "string-template-parser";
 
 export const RULE_NAME = "default-import-name";
 export type MessageIds = "unmatchedDefaultImportName";
 export type Options =
-  | [{ ignoredSourceRegexes: Array<string> | undefined }]
+  | [
+      {
+        ignoredSourceRegexes?: Array<string>;
+        mapFilenamesToImportName?: Record<string, string>;
+      },
+    ]
   | [];
 
 function shouldIgnoreFile({
@@ -46,6 +52,15 @@ export default createEslintRule<Options, MessageIds>({
               },
             ],
           },
+          mapFilenamesToImportName: {
+            description:
+              "Object mapping fileName regex to import name based on the file name",
+            anyOf: [
+              {
+                type: ["object"],
+              },
+            ],
+          },
         },
       },
     ],
@@ -56,6 +71,9 @@ export default createEslintRule<Options, MessageIds>({
   },
 
   create(context) {
+    const mappingConfig = (context.options[0]?.mapFilenamesToImportName ??
+      null) as Record<string, string> | null;
+
     const configExcludedRegexes =
       (context.options[0]?.ignoredSourceRegexes as Array<string> | undefined) ??
       [];
@@ -108,6 +126,7 @@ export default createEslintRule<Options, MessageIds>({
           context,
           actualImportName,
           fileName,
+          mappingConfig,
         });
 
         if (actualImportName !== expectedImportName) {
@@ -149,22 +168,52 @@ export default createEslintRule<Options, MessageIds>({
   },
 });
 
+function transformSnippetText(snippetText: string, value: string): string {
+  const pipeFunctions = {
+    pascalcase: (val: string) => pascalCase(val),
+    camelcase: (val: string) => camelCase(val),
+    uppercase: (val: string) => val.toUpperCase(),
+    lowercase: (val: string) => val.toLowerCase(),
+  };
+
+  return evaluateStringTemplate(snippetText, { value }, pipeFunctions);
+}
+
 function getExpectedImportNameWithoutConflicts({
   context,
   actualImportName,
   fileName,
+  mappingConfig,
 }: {
   context: RuleContext<MessageIds, Options>;
   actualImportName: string;
   fileName: string;
+  mappingConfig: Record<string, string> | null;
 }) {
   const fileNameWithoutExtension = fileName.includes(".")
     ? fileName.split(".").slice(0, -1).join(".")
     : fileName;
 
-  const expectedImportName = fileNameWithoutExtension.includes("-")
+  let expectedImportName = fileNameWithoutExtension.includes("-")
     ? camelCase(fileNameWithoutExtension)
     : fileNameWithoutExtension;
+
+  // Apply mappingConfig if provided
+  if (mappingConfig != null) {
+    for (const [regex, snippet] of Object.entries(mappingConfig)) {
+      if (new RegExp(regex).test(fileName)) {
+        try {
+          // Transform the snippet text with the file name
+          const transformedName = transformSnippetText(snippet, fileNameWithoutExtension);
+          expectedImportName = transformedName;
+          break; // Use the first matching pattern
+        } catch (error) {
+          // If snippet parsing fails, continue with the original name
+          console.warn(`Failed to parse snippet for ${fileName}:`, error);
+        }
+      }
+    }
+  }
 
   const existingVariables = new Set(
     context.sourceCode.ast.tokens

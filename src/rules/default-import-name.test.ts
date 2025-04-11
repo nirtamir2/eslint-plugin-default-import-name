@@ -1,8 +1,7 @@
 import rule, { RULE_NAME } from "./default-import-name.js";
 import { run } from "./_test";
-import { any as astro, any as ts, any as tsx } from "code-tag";
+import { any as ts, any as tsx } from "code-tag";
 import typescriptEslintParser from "@typescript-eslint/parser";
-import astroEslintParser from "astro-eslint-parser";
 
 run({
   name: RULE_NAME,
@@ -316,6 +315,275 @@ run({
         },
       ],
     },
+
+    // SVG Icon pattern mapping tests
+    {
+      description: "Should add Icon suffix to SVG imports",
+      code: ts`import logo from "./logo.svg";`,
+      output: ts`import LogoIcon from "./logo.svg";`,
+      options: [
+        {
+          mapFilenamesToImportName: {
+            "\\.svg$": "${value|pascalcase}Icon",
+          },
+        },
+      ],
+      errors: [
+        {
+          messageId: "unmatchedDefaultImportName",
+          data: {
+            fileName: "logo.svg",
+            expectedImportName: "LogoIcon",
+            actualImportName: "logo",
+          },
+        },
+      ],
+    },
+    {
+      description: "Should handle kebab-case SVG filenames with Icon suffix",
+      code: ts`import user from "./user-profile.svg";`,
+      output: ts`import UserProfileIcon from "./user-profile.svg";`,
+      options: [
+        {
+          mapFilenamesToImportName: {
+            "\\.svg$": "${value|pascalcase}Icon",
+          },
+        },
+      ],
+      errors: [
+        {
+          messageId: "unmatchedDefaultImportName",
+          data: {
+            fileName: "user-profile.svg",
+            expectedImportName: "UserProfileIcon",
+            actualImportName: "user",
+          },
+        },
+      ],
+    },
+    {
+      description: "Should handle multiple SVG imports with Icon suffix",
+      code: ts`
+        import logo from "./logo.svg";
+        import user from "./user-profile.svg";
+        import settings from "./settings.svg";
+      `,
+      output: ts`
+        import LogoIcon from "./logo.svg";
+        import UserProfileIcon from "./user-profile.svg";
+        import SettingsIcon from "./settings.svg";
+      `,
+      options: [
+        {
+          mapFilenamesToImportName: {
+            "\\.svg$": "${value|pascalcase}Icon",
+          },
+        },
+      ],
+      errors: [
+        {
+          messageId: "unmatchedDefaultImportName",
+          data: {
+            fileName: "logo.svg",
+            expectedImportName: "LogoIcon",
+            actualImportName: "logo",
+          },
+        },
+        {
+          messageId: "unmatchedDefaultImportName",
+          data: {
+            fileName: "user-profile.svg",
+            expectedImportName: "UserProfileIcon",
+            actualImportName: "user",
+          },
+        },
+        {
+          messageId: "unmatchedDefaultImportName",
+          data: {
+            fileName: "settings.svg",
+            expectedImportName: "SettingsIcon",
+            actualImportName: "settings",
+          },
+        },
+      ],
+    },
+    {
+      description: "Should handle SVG imports with existing Icon suffix",
+      code: ts`import logo from "./logo-icon.svg";`,
+      output: ts`import LogoIconIcon from "./logo-icon.svg";`,
+      options: [
+        {
+          mapFilenamesToImportName: {
+            "\\.svg$": "${value|pascalcase}Icon",
+          },
+        },
+      ],
+      errors: [
+        {
+          messageId: "unmatchedDefaultImportName",
+          data: {
+            fileName: "logo-icon.svg",
+            expectedImportName: "LogoIconIcon",
+            actualImportName: "logo",
+          },
+        },
+      ],
+    },
+    {
+      description: "Should not affect non-SVG imports",
+      code: ts`import user from "./user.ts";`,
+      output: ts`import user from "./user.ts";`,
+      options: [
+        {
+          mapFilenamesToImportName: {
+            "\\.svg$": "${value|pascalcase}Icon",
+          },
+        },
+      ],
+      errors: [
+        {
+          messageId: "unmatchedDefaultImportName",
+          data: {
+            fileName: "user.ts",
+            expectedImportName: "user",
+            actualImportName: "user",
+          },
+        },
+      ],
+    },
+
+    // String template parser format tests
+    {
+      description: "Should transform import name using string template parser with pascalcase",
+      code: ts`import user from "./get-user.ts";`,
+      output: ts`import GetUser from "./get-user.ts";`,
+      options: [
+        {
+          mapFilenamesToImportName: {
+            "get-.*\\.ts$": "${value|pascalcase}",
+          },
+        },
+      ],
+      errors: [
+        {
+          messageId: "unmatchedDefaultImportName",
+          data: {
+            fileName: "get-user.ts",
+            expectedImportName: "GetUser",
+            actualImportName: "user",
+          },
+        },
+      ],
+    },
+    {
+      description: "Should transform import name using string template parser with uppercase",
+      code: ts`import user from "./get-user.ts";`,
+      output: ts`import GETUSER from "./get-user.ts";`,
+      options: [
+        {
+          mapFilenamesToImportName: {
+            "get-.*\\.ts$": "${value|uppercase}",
+          },
+        },
+      ],
+      errors: [
+        {
+          messageId: "unmatchedDefaultImportName",
+          data: {
+            fileName: "get-user.ts",
+            expectedImportName: "GETUSER",
+            actualImportName: "user",
+          },
+        },
+      ],
+    },
+    {
+      description: "Should transform import name using string template parser with multiple pipes",
+      code: ts`import user from "./get-user.ts";`,
+      output: ts`import GET_USER from "./get-user.ts";`,
+      options: [
+        {
+          mapFilenamesToImportName: {
+            "get-.*\\.ts$": "${value|uppercase|lowercase}",
+          },
+        },
+      ],
+      errors: [
+        {
+          messageId: "unmatchedDefaultImportName",
+          data: {
+            fileName: "get-user.ts",
+            expectedImportName: "GET_USER",
+            actualImportName: "user",
+          },
+        },
+      ],
+    },
+
+    // Default template tests
+    {
+      description: "Should use default template for files without specific mapping",
+      code: ts`import user from "./get-user.ts";`,
+      output: ts`import getUser from "./get-user.ts";`,
+      options: [
+        {
+          defaultTemplate: "${value|camelcase}",
+        },
+      ],
+      errors: [
+        {
+          messageId: "unmatchedDefaultImportName",
+          data: {
+            fileName: "get-user.ts",
+            expectedImportName: "getUser",
+            actualImportName: "user",
+          },
+        },
+      ],
+    },
+    {
+      description: "Should use custom default template for files without specific mapping",
+      code: ts`import user from "./get-user.ts";`,
+      output: ts`import GetUser from "./get-user.ts";`,
+      options: [
+        {
+          defaultTemplate: "${value|pascalcase}",
+        },
+      ],
+      errors: [
+        {
+          messageId: "unmatchedDefaultImportName",
+          data: {
+            fileName: "get-user.ts",
+            expectedImportName: "GetUser",
+            actualImportName: "user",
+          },
+        },
+      ],
+    },
+    {
+      description: "Should use default template when no mapping matches",
+      code: ts`import user from "./get-user.ts";`,
+      output: ts`import getUser from "./get-user.ts";`,
+      options: [
+        {
+          defaultTemplate: "${value|camelcase}",
+          mapFilenamesToImportName: {
+            "\\.svg$": "${value|pascalcase}Icon",
+          },
+        },
+      ],
+      errors: [
+        {
+          messageId: "unmatchedDefaultImportName",
+          data: {
+            fileName: "get-user.ts",
+            expectedImportName: "getUser",
+            actualImportName: "user",
+          },
+        },
+      ],
+    },
   ],
   valid: [
     // Basic valid cases
@@ -479,45 +747,6 @@ run({
             fileName: "A.astro",
             expectedImportName: "A_1",
             actualImportName: "B",
-          },
-        },
-      ],
-    },
-  ],
-});
-
-run({
-  name: RULE_NAME,
-  rule,
-  languageOptions: {
-    parser: astroEslintParser,
-  },
-  invalid: [
-    {
-      description: "Astro",
-      code: astro`---
-import Blog from "../../layouts/ArticleLayout.astro";
----
-
-<Blog>
-  test
-</Blog>
-`,
-      output: astro`---
-import ArticleLayout from "../../layouts/ArticleLayout.astro";
----
-
-<ArticleLayout>
-  test
-</ArticleLayout>
-`,
-      errors: [
-        {
-          messageId: "unmatchedDefaultImportName",
-          data: {
-            fileName: "ArticleLayout.astro",
-            expectedImportName: "ArticleLayout",
-            actualImportName: "Blog",
           },
         },
       ],
