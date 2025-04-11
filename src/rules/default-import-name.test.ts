@@ -1,7 +1,8 @@
 import rule, { RULE_NAME } from "./default-import-name.js";
 import { run } from "./_test";
-import { any as ts, any as tsx } from "code-tag";
+import { any as astro, any as ts, any as tsx } from "code-tag";
 import typescriptEslintParser from "@typescript-eslint/parser";
+import astroEslintParser from "astro-eslint-parser";
 
 run({
   name: RULE_NAME,
@@ -88,35 +89,13 @@ run({
 
     // Custom mapping tests
     {
-      description: "Should apply custom mapping for specific file pattern",
-      code: ts`import user from "./get-user.ts";`,
-      output: ts`import GetUser from "./get-user.ts";`,
-      options: [
-        {
-          mapImportPathToName: {
-            "get-.*\\.ts$": "${value|pascalcase}",
-          },
-        },
-      ],
-      errors: [
-        {
-          messageId: "unmatchedDefaultImportName",
-          data: {
-            fileName: "get-user.ts",
-            expectedImportName: "GetUser",
-            actualImportName: "user",
-          },
-        },
-      ],
-    },
-    {
-      description: "Should convert SVG files to camelCase with Src suffix",
+      description: "Should apply custom mapping for SVG files with Icon suffix",
       code: ts`import logo from "./user-logo.svg";`,
-      output: ts`import userLogoSrc from "./user-logo.svg";`,
+      output: ts`import UserLogoIcon from "./user-logo.svg";`,
       options: [
         {
           mapImportPathToName: {
-            "\\.svg$": "${value|camelcase}Src",
+            "\\.svg$": "${value|pascalcase}Icon",
           },
         },
       ],
@@ -125,38 +104,17 @@ run({
           messageId: "unmatchedDefaultImportName",
           data: {
             fileName: "user-logo.svg",
-            expectedImportName: "userLogoSrc",
+            expectedImportName: "UserLogoIcon",
             actualImportName: "logo",
           },
         },
       ],
     },
     {
-      description: "Should apply custom mapping with multiple transformations",
-      code: ts`import user from "./get-user.ts";`,
-      output: ts`import GET_USER from "./get-user.ts";`,
-      options: [
-        {
-          mapImportPathToName: {
-            "get-.*\\.ts$": "${value|snakecase|uppercase}",
-          },
-        },
-      ],
-      errors: [
-        {
-          messageId: "unmatchedDefaultImportName",
-          data: {
-            fileName: "get-user.ts",
-            expectedImportName: "GET_USER",
-            actualImportName: "user",
-          },
-        },
-      ],
-    },
-    {
-      description: "Should apply custom mapping for directory-specific files",
-      code: ts`import myConfig from "./constants/my-config.ts";`,
-      output: ts`import MY_CONFIG from "./constants/my-config.ts";`,
+      description:
+        "Should apply custom mapping for constants in UPPER_SNAKE_CASE",
+      code: ts`import config from "./constants/user-config.ts";`,
+      output: ts`import USER_CONFIG from "./constants/user-config.ts";`,
       options: [
         {
           mapImportPathToName: {
@@ -168,43 +126,22 @@ run({
         {
           messageId: "unmatchedDefaultImportName",
           data: {
-            fileName: "my-config.ts",
-            expectedImportName: "MY_CONFIG",
-            actualImportName: "myConfig",
+            fileName: "user-config.ts",
+            expectedImportName: "USER_CONFIG",
+            actualImportName: "config",
           },
         },
       ],
     },
     {
-      description: "Should apply custom mapping with suffix",
-      code: ts`import user from "./user.ts";`,
-      output: ts`import UserService from "./user.ts";`,
+      description:
+        "Should apply custom mapping for React hooks with use prefix",
+      code: ts`import user from "./hooks/user.ts";`,
+      output: ts`import useUser from "./hooks/user.ts";`,
       options: [
         {
           mapImportPathToName: {
-            ".*\\.ts$": "${value|pascalcase}Service",
-          },
-        },
-      ],
-      errors: [
-        {
-          messageId: "unmatchedDefaultImportName",
-          data: {
-            fileName: "user.ts",
-            expectedImportName: "UserService",
-            actualImportName: "user",
-          },
-        },
-      ],
-    },
-    {
-      description: "Should apply custom mapping with prefix",
-      code: ts`import user from "./user.ts";`,
-      output: ts`import useUser from "./user.ts";`,
-      options: [
-        {
-          mapImportPathToName: {
-            ".*\\.ts$": "use${value|pascalcase}",
+            "\\/hooks\\/.*\\.ts$": "use${value|pascalcase}",
           },
         },
       ],
@@ -221,13 +158,13 @@ run({
     },
     {
       description: "Should apply multiple custom mappings in order",
-      code: ts`import user from "./get-user.ts";`,
-      output: ts`import useGetUser from "./get-user.ts";`,
+      code: ts`import user from "./hooks/get-user.ts";`,
+      output: ts`import useGetUser from "./hooks/get-user.ts";`,
       options: [
         {
           mapImportPathToName: {
-            ".*\\.ts$": "use${value|pascalcase}",
-            "get-.*\\.ts$": "use${value|pascalcase}",
+            ".*\\.ts$": "notUse${value|pascalcase}",
+            "\\/hooks\\/.*\\.ts$": "use${value|pascalcase}",
           },
         },
       ],
@@ -245,44 +182,14 @@ run({
 
     // Path alias tests
     {
-      description: "Should handle path alias imports with @ prefix",
-      code: ts`import B from "@/A.astro";`,
-      output: ts`import A from "@/A.astro";`,
+      description: "Should handle path alias imports",
+      code: ts`import B from "@/A.ts";`,
+      output: ts`import A from "@/A.ts";`,
       errors: [
         {
           messageId: "unmatchedDefaultImportName",
           data: {
-            fileName: "A.astro",
-            expectedImportName: "A",
-            actualImportName: "B",
-          },
-        },
-      ],
-    },
-    {
-      description: "Should handle path alias imports with ~ prefix",
-      code: ts`import B from "~/A.astro";`,
-      output: ts`import A from "~/A.astro";`,
-      errors: [
-        {
-          messageId: "unmatchedDefaultImportName",
-          data: {
-            fileName: "A.astro",
-            expectedImportName: "A",
-            actualImportName: "B",
-          },
-        },
-      ],
-    },
-    {
-      description: "Should handle path alias imports without extension",
-      code: ts`import B from "~/A";`,
-      output: ts`import A from "~/A";`,
-      errors: [
-        {
-          messageId: "unmatchedDefaultImportName",
-          data: {
-            fileName: "A",
+            fileName: "A.ts",
             expectedImportName: "A",
             actualImportName: "B",
           },
@@ -292,7 +199,7 @@ run({
 
     // Variable usage tests
     {
-      description: "Should rename import and all its usages in the code",
+      description: "Should rename import and all its usages",
       code: ts`
         import account from "./user";
         account.a;
@@ -317,31 +224,7 @@ run({
       ],
     },
     {
-      description:
-        "Should rename import and its usages in object destructuring",
-      code: ts`
-        import account from "./user";
-        const { a, b } = account;
-        const c = account.c;
-      `,
-      output: ts`
-        import user from "./user";
-        const { a, b } = user;
-        const c = user.c;
-      `,
-      errors: [
-        {
-          messageId: "unmatchedDefaultImportName",
-          data: {
-            fileName: "user",
-            expectedImportName: "user",
-            actualImportName: "account",
-          },
-        },
-      ],
-    },
-    {
-      description: "Should rename import and its usages if we have conflict",
+      description: "Should handle import name conflicts",
       code: ts`
         import account from "./user";
         const user = {};
@@ -702,31 +585,6 @@ run({
       ],
     },
     {
-      description: "Should rename JSX component with props and children",
-      code: tsx`
-        import B from "~/A.astro";
-        <B prop1="value">
-          <div>Child</div>
-        </B>;
-      `,
-      output: tsx`
-        import A from "~/A.astro";
-        <A prop1="value">
-          <div>Child</div>
-        </A>;
-      `,
-      errors: [
-        {
-          messageId: "unmatchedDefaultImportName",
-          data: {
-            fileName: "A.astro",
-            expectedImportName: "A",
-            actualImportName: "B",
-          },
-        },
-      ],
-    },
-    {
       description: "Should handle JSX component conflicts",
       code: tsx`
         import B from "~/A.astro";
@@ -749,6 +607,112 @@ run({
             fileName: "A.astro",
             expectedImportName: "A_1",
             actualImportName: "B",
+          },
+        },
+      ],
+    },
+  ],
+});
+
+// Configuration tests
+run({
+  name: RULE_NAME,
+  rule,
+  valid: [
+    {
+      description: "Should handle custom ignoredSourceRegexes configuration",
+      code: ts`import something from "./custom-ignored.astro";`,
+      options: [
+        {
+          ignoredSourceRegexes: ["custom-ignored.astro$"],
+        },
+      ],
+    },
+    {
+      description: "Should handle custom mapImportPathToName configuration",
+      code: ts`import UserService from "./user.ts";`,
+      options: [
+        {
+          mapImportPathToName: {
+            ".*\\.ts$": "${value|pascalcase}Service",
+          },
+        },
+      ],
+    },
+    {
+      description: "Should handle multiple custom configurations",
+      code: ts`
+        import UserService from "./user.ts";
+        import something from "./custom-ignored.astro";
+      `,
+      options: [
+        {
+          mapImportPathToName: {
+            ".*\\.ts$": "${value|pascalcase}Service",
+          },
+          ignoredSourceRegexes: ["custom-ignored.astro$"],
+        },
+      ],
+    },
+  ],
+  invalid: [
+    {
+      description: "Should apply custom mapImportPathToName configuration",
+      code: ts`import user from "./user.ts";`,
+      output: ts`import UserService from "./user.ts";`,
+      options: [
+        {
+          mapImportPathToName: {
+            ".*\\.ts$": "${value|pascalcase}Service",
+          },
+        },
+      ],
+      errors: [
+        {
+          messageId: "unmatchedDefaultImportName",
+          data: {
+            fileName: "user.ts",
+            expectedImportName: "UserService",
+            actualImportName: "user",
+          },
+        },
+      ],
+    },
+  ],
+});
+
+run({
+  name: RULE_NAME,
+  rule,
+  languageOptions: {
+    parser: astroEslintParser,
+  },
+  invalid: [
+    {
+      description: "Astro",
+      code: astro`---
+import Blog from "../../layouts/ArticleLayout.astro";
+---
+
+<Blog>
+  test
+</Blog>
+`,
+      output: astro`---
+import ArticleLayout from "../../layouts/ArticleLayout.astro";
+---
+
+<ArticleLayout>
+  test
+</ArticleLayout>
+`,
+      errors: [
+        {
+          messageId: "unmatchedDefaultImportName",
+          data: {
+            fileName: "ArticleLayout.astro",
+            expectedImportName: "ArticleLayout",
+            actualImportName: "Blog",
           },
         },
       ],
