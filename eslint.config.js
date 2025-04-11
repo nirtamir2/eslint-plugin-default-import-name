@@ -9,6 +9,11 @@ export default nirtamir2(
       ignores: ["vendor"],
     },
     {
+      // This is a port of https://github.com/souldreamer/string-template-parser that does not support ESM
+      // @see https://github.com/souldreamer/string-template-parser/issues/2
+      ignores: ["src/string-template-parser"],
+    },
+    {
       rules: {
         "sonarjs/cognitive-complexity": "off",
         "sonarjs/no-empty-test-file": "off",

@@ -2,7 +2,7 @@ import { camelCase, flatCase, pascalCase, snakeCase } from "scule";
 import { createEslintRule } from "../utils";
 import { AST_NODE_TYPES, AST_TOKEN_TYPES } from "@typescript-eslint/utils";
 import type { RuleContext } from "@typescript-eslint/utils/ts-eslint";
-import { evaluateStringTemplate } from "string-template-parser";
+import { evaluateStringTemplate } from "../string-template-parser";
 
 type ImportPathRegexToTemplateConfig = Record<string, string>;
 
