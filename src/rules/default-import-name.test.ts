@@ -94,7 +94,7 @@ run({
       output: ts`import UserLogoIcon from "./user-logo.svg";`,
       options: [
         {
-          mapImportPathToName: {
+          importPathRegexToTemplate: {
             "\\.svg$": "${value|pascalcase}Icon",
           },
         },
@@ -117,7 +117,7 @@ run({
       output: ts`import USER_CONFIG from "./constants/user-config.ts";`,
       options: [
         {
-          mapImportPathToName: {
+          importPathRegexToTemplate: {
             "\\/constants\\/.*\\.ts$": "${value|snakecase|uppercase}",
           },
         },
@@ -140,7 +140,7 @@ run({
       output: ts`import useUser from "./hooks/user.ts";`,
       options: [
         {
-          mapImportPathToName: {
+          importPathRegexToTemplate: {
             "\\/hooks\\/.*\\.ts$": "use${value|pascalcase}",
           },
         },
@@ -162,7 +162,7 @@ run({
       output: ts`import useGetUser from "./hooks/get-user.ts";`,
       options: [
         {
-          mapImportPathToName: {
+          importPathRegexToTemplate: {
             ".*\\.ts$": "notUse${value|pascalcase}",
             "\\/hooks\\/.*\\.ts$": "use${value|pascalcase}",
           },
@@ -363,7 +363,7 @@ run({
       output: ts`import LogoIcon from "./logo.svg";`,
       options: [
         {
-          mapImportPathToName: {
+          importPathRegexToTemplate: {
             "\\.svg$": "${value|pascalcase}Icon",
           },
         },
@@ -385,7 +385,7 @@ run({
       output: ts`import UserProfileIcon from "./user-profile.svg";`,
       options: [
         {
-          mapImportPathToName: {
+          importPathRegexToTemplate: {
             "\\.svg$": "${value|pascalcase}Icon",
           },
         },
@@ -415,7 +415,7 @@ run({
       `,
       options: [
         {
-          mapImportPathToName: {
+          importPathRegexToTemplate: {
             "\\.svg$": "${value|pascalcase}Icon",
           },
         },
@@ -453,7 +453,7 @@ run({
       output: ts`import LogoIconIcon from "./logo-icon.svg";`,
       options: [
         {
-          mapImportPathToName: {
+          importPathRegexToTemplate: {
             "\\.svg$": "${value|pascalcase}Icon",
           },
         },
@@ -629,11 +629,12 @@ run({
       ],
     },
     {
-      description: "Should handle custom mapImportPathToName configuration",
+      description:
+        "Should handle custom importPathRegexToTemplate configuration",
       code: ts`import UserService from "./user.ts";`,
       options: [
         {
-          mapImportPathToName: {
+          importPathRegexToTemplate: {
             ".*\\.ts$": "${value|pascalcase}Service",
           },
         },
@@ -647,7 +648,7 @@ run({
       `,
       options: [
         {
-          mapImportPathToName: {
+          importPathRegexToTemplate: {
             ".*\\.ts$": "${value|pascalcase}Service",
           },
           ignoredSourceRegexes: ["custom-ignored.astro$"],
@@ -657,12 +658,13 @@ run({
   ],
   invalid: [
     {
-      description: "Should apply custom mapImportPathToName configuration",
+      description:
+        "Should apply custom importPathRegexToTemplate configuration",
       code: ts`import user from "./user.ts";`,
       output: ts`import UserService from "./user.ts";`,
       options: [
         {
-          mapImportPathToName: {
+          importPathRegexToTemplate: {
             ".*\\.ts$": "${value|pascalcase}Service",
           },
         },

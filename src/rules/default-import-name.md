@@ -8,16 +8,16 @@
 
 <!-- begin auto-generated rule options list -->
 
-| Name                   | Description                                                                     |
-| :--------------------- | :------------------------------------------------------------------------------ |
-| `ignoredSourceRegexes` | List of regexes to ignore import sources                                        |
-| `mapImportPathToName`  | Object mapping import path regex to import name template based on the file name |
+| Name                        | Description                                                                     |
+| :-------------------------- | :------------------------------------------------------------------------------ |
+| `ignoredSourceRegexes`      | List of regexes to ignore import sources                                        |
+| `importPathRegexToTemplate` | Object mapping import path regex to import name template based on the file name |
 
 <!-- end auto-generated rule options list -->
 
-## `mapImportPathToName`
+## `importPathRegexToTemplate`
 
-The `mapImportPathToName` option allows you to define custom mappings between import paths and import names using string templates. This is useful for enforcing consistent naming conventions across your codebase.
+The `importPathRegexToTemplate` option allows you to define custom mappings between import paths and import names using string templates. This is useful for enforcing consistent naming conventions across your codebase.
 
 ### Default Configuration
 
@@ -25,7 +25,7 @@ By default, the rule includes these mappings:
 
 ```json
 {
-  "mapImportPathToName": {
+  "importPathRegexToTemplate": {
     // Kebab-case files to camelCase
     ".*/[a-z0-9]+(-[a-z0-9]+)+(.[a-z0-9]+)?$": "${value|camelcase}",
     // Astro files to PascalCase
@@ -74,7 +74,7 @@ import user from "./get-user.ts"; // ❌ Incorrect
 
 ```json
 {
-  "mapImportPathToName": {
+  "importPathRegexToTemplate": {
     "\\.svg$": "${value|pascalcase}Icon"
   }
 }
@@ -90,7 +90,7 @@ import logo from "./logo.svg"; // ❌ Incorrect
 
 ```json
 {
-  "mapImportPathToName": {
+  "importPathRegexToTemplate": {
     "\\/constants\\/.*\\.ts$": "${value|snakecase|uppercase}"
   }
 }
@@ -106,7 +106,7 @@ import userConfig from "./constants/user-config.ts"; // ❌ Incorrect
 
 ```json
 {
-  "mapImportPathToName": {
+  "importPathRegexToTemplate": {
     ".*\\.ts$": "${value|pascalcase}Service"
   }
 }
@@ -122,7 +122,7 @@ import user from "./user.ts"; // ❌ Incorrect
 
 ```json
 {
-  "mapImportPathToName": {
+  "importPathRegexToTemplate": {
     "\\/hooks\\/.*\\.ts$": "use${value|pascalcase}"
   }
 }
@@ -140,7 +140,7 @@ When multiple patterns match a file, the last will be used. For example:
 
 ```json
 {
-  "mapImportPathToName": {
+  "importPathRegexToTemplate": {
     ".*\\.ts$": "notUse${value|pascalcase}",
     "\\/hooks\\/.*\\.ts$": "use${value|pascalcase}"
   }

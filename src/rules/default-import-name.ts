@@ -4,7 +4,7 @@ import { AST_NODE_TYPES, AST_TOKEN_TYPES } from "@typescript-eslint/utils";
 import type { RuleContext } from "@typescript-eslint/utils/ts-eslint";
 import { evaluateStringTemplate } from "string-template-parser";
 
-type ImportPathToNameConfig = Record<string, string>;
+type ImportPathRegexToTemplateConfig = Record<string, string>;
 
 export const RULE_NAME = "default-import-name";
 export type MessageIds = "unmatchedDefaultImportName";
@@ -12,7 +12,7 @@ export type Options =
   | [
       {
         ignoredSourceRegexes?: Array<string>;
-        mapImportPathToName?: ImportPathToNameConfig;
+        importPathRegexToTemplate?: ImportPathRegexToTemplateConfig;
       },
     ]
   | [];
@@ -34,18 +34,19 @@ function shouldIgnoreFile({
   });
 }
 
-export const defaultImportPathToNameConfig: ImportPathToNameConfig = {
-  // Default mapping for files with kebab-case
-  ".*/[a-z0-9]+(-[a-z0-9]+)+(.[a-z0-9]+)?$": "${value|camelcase}",
-  // Astro files
-  ".*.astro": "${value|pascalcase}",
-  // React files
-  ".*.tsx": "${value|pascalcase}",
-  // CSS files
-  ".*.css": "styles",
-  // SVG files
-  ".*.svg": "${value|camelcase}Src",
-};
+export const defaultImportPathToTemplateConfig: ImportPathRegexToTemplateConfig =
+  {
+    // Default mapping for files with kebab-case
+    ".*/[a-z0-9]+(-[a-z0-9]+)+(.[a-z0-9]+)?$": "${value|camelcase}",
+    // Astro files
+    ".*.astro": "${value|pascalcase}",
+    // React files
+    ".*.tsx": "${value|pascalcase}",
+    // CSS files
+    ".*.css": "styles",
+    // SVG files
+    ".*.svg": "${value|camelcase}Src",
+  };
 
 export const defaultIgnoredSourceRegexes = [
   /**
@@ -87,19 +88,21 @@ function getExpectedImportNameWithoutConflicts({
   actualImportName,
   sourceImport,
   fileName,
-  mappingConfig,
+  importPathRegexToTemplate,
 }: {
   context: RuleContext<MessageIds, Options>;
   actualImportName: string;
   sourceImport: string;
   fileName: string;
-  mappingConfig: ImportPathToNameConfig;
+  importPathRegexToTemplate: ImportPathRegexToTemplateConfig;
 }): string {
   const fileNameWithoutExtension = getFileNameWithoutExtension(fileName);
   let expectedImportName = fileNameWithoutExtension;
 
-  // Apply mappingConfig if provided
-  for (const [regex, snippet] of Object.entries(mappingConfig).toReversed()) {
+  // Apply importPathRegexToTemplate if provided
+  for (const [regex, snippet] of Object.entries(
+    importPathRegexToTemplate,
+  ).toReversed()) {
     try {
       if (new RegExp(regex).test(sourceImport)) {
         const transformedName = transformSnippetText(
@@ -139,7 +142,7 @@ export default createEslintRule<Options, MessageIds>({
   name: RULE_NAME,
   defaultOptions: [
     {
-      mapImportPathToName: defaultImportPathToNameConfig,
+      importPathRegexToTemplate: defaultImportPathToTemplateConfig,
       ignoredSourceRegexes: defaultIgnoredSourceRegexes,
     },
   ],
@@ -161,7 +164,7 @@ export default createEslintRule<Options, MessageIds>({
               type: "string",
             },
           },
-          mapImportPathToName: {
+          importPathRegexToTemplate: {
             description:
               "Object mapping import path regex to import name template based on the file name",
             type: "object",
@@ -179,8 +182,9 @@ export default createEslintRule<Options, MessageIds>({
   },
 
   create(context) {
-    const mappingConfig = (context.options[0]?.mapImportPathToName ??
-      defaultImportPathToNameConfig) as ImportPathToNameConfig;
+    const importPathRegexToTemplate = (context.options[0]
+      ?.importPathRegexToTemplate ??
+      defaultImportPathToTemplateConfig) as ImportPathRegexToTemplateConfig;
 
     const configExcludedRegexes =
       (context.options[0]?.ignoredSourceRegexes as Array<string> | undefined) ??
@@ -223,7 +227,7 @@ export default createEslintRule<Options, MessageIds>({
           actualImportName,
           sourceImport,
           fileName,
-          mappingConfig,
+          importPathRegexToTemplate,
         });
 
         if (actualImportName !== expectedImportName) {
