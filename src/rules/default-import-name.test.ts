@@ -93,7 +93,7 @@ run({
       output: ts`import GetUser from "./get-user.ts";`,
       options: [
         {
-          mapFilenamesToImportName: {
+          mapImportPathToName: {
             "get-.*\\.ts$": "${value|pascalcase}",
           },
         },
@@ -115,7 +115,7 @@ run({
       output: ts`import GET_USER from "./get-user.ts";`,
       options: [
         {
-          mapFilenamesToImportName: {
+          mapImportPathToName: {
             "get-.*\\.ts$": "${value|snakecase|uppercase}",
           },
         },
@@ -137,7 +137,7 @@ run({
       output: ts`import MY_CONFIG from "./constants/my-config.ts";`,
       options: [
         {
-          mapFilenamesToImportName: {
+          mapImportPathToName: {
             "\\/constants\\/.*\\.ts$": "${value|snakecase|uppercase}",
           },
         },
@@ -159,7 +159,7 @@ run({
       output: ts`import UserService from "./user.ts";`,
       options: [
         {
-          mapFilenamesToImportName: {
+          mapImportPathToName: {
             ".*\\.ts$": "${value|pascalcase}Service",
           },
         },
@@ -181,7 +181,7 @@ run({
       output: ts`import useUser from "./user.ts";`,
       options: [
         {
-          mapFilenamesToImportName: {
+          mapImportPathToName: {
             ".*\\.ts$": "use${value|pascalcase}",
           },
         },
@@ -203,7 +203,7 @@ run({
       output: ts`import useGetUser from "./get-user.ts";`,
       options: [
         {
-          mapFilenamesToImportName: {
+          mapImportPathToName: {
             ".*\\.ts$": "use${value|pascalcase}",
             "get-.*\\.ts$": "use${value|pascalcase}",
           },
@@ -458,7 +458,7 @@ run({
       output: ts`import LogoIcon from "./logo.svg";`,
       options: [
         {
-          mapFilenamesToImportName: {
+          mapImportPathToName: {
             "\\.svg$": "${value|pascalcase}Icon",
           },
         },
@@ -480,7 +480,7 @@ run({
       output: ts`import UserProfileIcon from "./user-profile.svg";`,
       options: [
         {
-          mapFilenamesToImportName: {
+          mapImportPathToName: {
             "\\.svg$": "${value|pascalcase}Icon",
           },
         },
@@ -510,7 +510,7 @@ run({
       `,
       options: [
         {
-          mapFilenamesToImportName: {
+          mapImportPathToName: {
             "\\.svg$": "${value|pascalcase}Icon",
           },
         },
@@ -548,7 +548,7 @@ run({
       output: ts`import LogoIconIcon from "./logo-icon.svg";`,
       options: [
         {
-          mapFilenamesToImportName: {
+          mapImportPathToName: {
             "\\.svg$": "${value|pascalcase}Icon",
           },
         },

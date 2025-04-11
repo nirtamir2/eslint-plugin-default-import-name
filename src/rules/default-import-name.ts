@@ -10,7 +10,7 @@ export type Options =
   | [
       {
         ignoredSourceRegexes?: Array<string>;
-        mapFilenamesToImportName?: Record<string, string>;
+        mapImportPathToName?: Record<string, string>;
       },
     ]
   | [];
@@ -27,9 +27,7 @@ function shouldIgnoreFile({
   });
 }
 
-export const defaultFilenamesToImportNameConfig = {
-  // Default mapping for all files
-  ".*": "${value}",
+export const defaultImportPathToNameConfig = {
   // Default mapping for files with kebab-case
   ".*-.*": "${value|camelcase}",
 };
@@ -38,7 +36,7 @@ export default createEslintRule<Options, MessageIds>({
   name: RULE_NAME,
   defaultOptions: [
     {
-      mapFilenamesToImportName: defaultFilenamesToImportNameConfig,
+      mapImportPathToName: defaultImportPathToNameConfig,
     },
   ],
   meta: {
@@ -63,9 +61,9 @@ export default createEslintRule<Options, MessageIds>({
               },
             ],
           },
-          mapFilenamesToImportName: {
+          mapImportPathToName: {
             description:
-              "Object mapping fileName regex to import name based on the file name",
+              "Object mapping import path regex to import name template based on the file name",
             anyOf: [
               {
                 type: ["object"],
@@ -82,8 +80,8 @@ export default createEslintRule<Options, MessageIds>({
   },
 
   create(context) {
-    const mappingConfig = (context.options[0]?.mapFilenamesToImportName ??
-      defaultFilenamesToImportNameConfig) as Record<string, string>;
+    const mappingConfig = (context.options[0]?.mapImportPathToName ??
+      defaultImportPathToNameConfig) as Record<string, string>;
 
     const configExcludedRegexes =
       (context.options[0]?.ignoredSourceRegexes as Array<string> | undefined) ??
@@ -213,7 +211,6 @@ function getExpectedImportNameWithoutConflicts({
 
   let expectedImportName = fileNameWithoutExtension;
 
-  // Apply mappingConfig if provided
   if (mappingConfig != null) {
     for (const [regex, snippet] of Object.entries(mappingConfig).toReversed()) {
       if (new RegExp(regex).test(sourceImport)) {
