@@ -72,7 +72,8 @@
     "eslint": "*"
   },
   "dependencies": {
-    "scule": "^1.1.1"
+    "scule": "^1.1.1",
+    "string-template-parser": "^1.2.6"
   },
   "devDependencies": {
     "@nirtamir2/eslint-config": "0.0.2-beta.20",

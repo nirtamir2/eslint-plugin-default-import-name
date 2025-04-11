@@ -31,7 +31,7 @@ export default [defaultImportNameConfig()];
 🔧 Automatically fixable by the [`--fix` CLI option](https://eslint.org/docs/user-guide/command-line-interface#--fix).
 
 | Name                                                    | Description                                 | 🔧  |
-|:--------------------------------------------------------| :------------------------------------------ | :-- |
+| :------------------------------------------------------ | :------------------------------------------ | :-- |
 | [default-import-name](src/rules/default-import-name.md) | enforce default imports matching file names | 🔧  |
 
 <!-- end auto-generated rules list -->

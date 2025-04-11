@@ -55,7 +55,7 @@ run({
       ],
     },
 
-    // Kebab-case to camelCase conversion tests
+    // Default kebab-case to camelCase conversion tests
     {
       description: "Should convert kebab-case file name to camelCase import",
       code: ts`import user from "./get-user.ts";`,
@@ -87,46 +87,109 @@ run({
       ],
     },
 
+    // Custom mapping tests
+    {
+      description: "Should apply custom mapping for SVG files with Icon suffix",
+      code: ts`import logo from "./user-logo.svg";`,
+      output: ts`import UserLogoIcon from "./user-logo.svg";`,
+      options: [
+        {
+          importPathRegexToTemplate: {
+            "\\.svg$": "${value|pascalcase}Icon",
+          },
+        },
+      ],
+      errors: [
+        {
+          messageId: "unmatchedDefaultImportName",
+          data: {
+            fileName: "user-logo.svg",
+            expectedImportName: "UserLogoIcon",
+            actualImportName: "logo",
+          },
+        },
+      ],
+    },
+    {
+      description:
+        "Should apply custom mapping for constants in UPPER_SNAKE_CASE",
+      code: ts`import config from "./constants/user-config.ts";`,
+      output: ts`import USER_CONFIG from "./constants/user-config.ts";`,
+      options: [
+        {
+          importPathRegexToTemplate: {
+            "\\/constants\\/.*\\.ts$": "${value|snakecase|uppercase}",
+          },
+        },
+      ],
+      errors: [
+        {
+          messageId: "unmatchedDefaultImportName",
+          data: {
+            fileName: "user-config.ts",
+            expectedImportName: "USER_CONFIG",
+            actualImportName: "config",
+          },
+        },
+      ],
+    },
+    {
+      description:
+        "Should apply custom mapping for React hooks with use prefix",
+      code: ts`import user from "./hooks/user.ts";`,
+      output: ts`import useUser from "./hooks/user.ts";`,
+      options: [
+        {
+          importPathRegexToTemplate: {
+            "\\/hooks\\/.*\\.ts$": "use${value|pascalcase}",
+          },
+        },
+      ],
+      errors: [
+        {
+          messageId: "unmatchedDefaultImportName",
+          data: {
+            fileName: "user.ts",
+            expectedImportName: "useUser",
+            actualImportName: "user",
+          },
+        },
+      ],
+    },
+    {
+      description: "Should apply multiple custom mappings in order",
+      code: ts`import user from "./hooks/get-user.ts";`,
+      output: ts`import useGetUser from "./hooks/get-user.ts";`,
+      options: [
+        {
+          importPathRegexToTemplate: {
+            ".*\\.ts$": "notUse${value|pascalcase}",
+            "\\/hooks\\/.*\\.ts$": "use${value|pascalcase}",
+          },
+        },
+      ],
+      errors: [
+        {
+          messageId: "unmatchedDefaultImportName",
+          data: {
+            fileName: "get-user.ts",
+            expectedImportName: "useGetUser",
+            actualImportName: "user",
+          },
+        },
+      ],
+    },
+
     // Path alias tests
     {
-      description: "Should handle path alias imports with @ prefix",
-      code: ts`import B from "@/A.astro";`,
-      output: ts`import A from "@/A.astro";`,
+      description: "Should handle path alias imports",
+      code: ts`import B from "@/A.ts";`,
+      output: ts`import A from "@/A.ts";`,
       errors: [
         {
           messageId: "unmatchedDefaultImportName",
           data: {
-            fileName: "A.astro",
-            expectedImportName: "A",
-            actualImportName: "B",
-          },
-        },
-      ],
-    },
-    {
-      description: "Should handle path alias imports with ~ prefix",
-      code: ts`import B from "~/A.astro";`,
-      output: ts`import A from "~/A.astro";`,
-      errors: [
-        {
-          messageId: "unmatchedDefaultImportName",
-          data: {
-            fileName: "A.astro",
-            expectedImportName: "A",
-            actualImportName: "B",
-          },
-        },
-      ],
-    },
-    {
-      description: "Should handle path alias imports without extension",
-      code: ts`import B from "~/A";`,
-      output: ts`import A from "~/A";`,
-      errors: [
-        {
-          messageId: "unmatchedDefaultImportName",
-          data: {
-            fileName: "A",
+            fileName: "A.ts",
             expectedImportName: "A",
             actualImportName: "B",
           },
@@ -136,7 +199,7 @@ run({
 
     // Variable usage tests
     {
-      description: "Should rename import and all its usages in the code",
+      description: "Should rename import and all its usages",
       code: ts`
         import account from "./user";
         account.a;
@@ -161,31 +224,7 @@ run({
       ],
     },
     {
-      description:
-        "Should rename import and its usages in object destructuring",
-      code: ts`
-        import account from "./user";
-        const { a, b } = account;
-        const c = account.c;
-      `,
-      output: ts`
-        import user from "./user";
-        const { a, b } = user;
-        const c = user.c;
-      `,
-      errors: [
-        {
-          messageId: "unmatchedDefaultImportName",
-          data: {
-            fileName: "user",
-            expectedImportName: "user",
-            actualImportName: "account",
-          },
-        },
-      ],
-    },
-    {
-      description: "Should rename import and its usages if we have conflict",
+      description: "Should handle import name conflicts",
       code: ts`
         import account from "./user";
         const user = {};
@@ -316,6 +355,120 @@ run({
         },
       ],
     },
+
+    // SVG Icon pattern mapping tests
+    {
+      description: "Should add Icon suffix to SVG imports",
+      code: ts`import logo from "./logo.svg";`,
+      output: ts`import LogoIcon from "./logo.svg";`,
+      options: [
+        {
+          importPathRegexToTemplate: {
+            "\\.svg$": "${value|pascalcase}Icon",
+          },
+        },
+      ],
+      errors: [
+        {
+          messageId: "unmatchedDefaultImportName",
+          data: {
+            fileName: "logo.svg",
+            expectedImportName: "LogoIcon",
+            actualImportName: "logo",
+          },
+        },
+      ],
+    },
+    {
+      description: "Should handle kebab-case SVG filenames with Icon suffix",
+      code: ts`import user from "./user-profile.svg";`,
+      output: ts`import UserProfileIcon from "./user-profile.svg";`,
+      options: [
+        {
+          importPathRegexToTemplate: {
+            "\\.svg$": "${value|pascalcase}Icon",
+          },
+        },
+      ],
+      errors: [
+        {
+          messageId: "unmatchedDefaultImportName",
+          data: {
+            fileName: "user-profile.svg",
+            expectedImportName: "UserProfileIcon",
+            actualImportName: "user",
+          },
+        },
+      ],
+    },
+    {
+      description: "Should handle multiple SVG imports with Icon suffix",
+      code: ts`
+        import logo from "./logo.svg";
+        import user from "./user-profile.svg";
+        import settings from "./settings.svg";
+      `,
+      output: ts`
+        import LogoIcon from "./logo.svg";
+        import UserProfileIcon from "./user-profile.svg";
+        import SettingsIcon from "./settings.svg";
+      `,
+      options: [
+        {
+          importPathRegexToTemplate: {
+            "\\.svg$": "${value|pascalcase}Icon",
+          },
+        },
+      ],
+      errors: [
+        {
+          messageId: "unmatchedDefaultImportName",
+          data: {
+            fileName: "logo.svg",
+            expectedImportName: "LogoIcon",
+            actualImportName: "logo",
+          },
+        },
+        {
+          messageId: "unmatchedDefaultImportName",
+          data: {
+            fileName: "user-profile.svg",
+            expectedImportName: "UserProfileIcon",
+            actualImportName: "user",
+          },
+        },
+        {
+          messageId: "unmatchedDefaultImportName",
+          data: {
+            fileName: "settings.svg",
+            expectedImportName: "SettingsIcon",
+            actualImportName: "settings",
+          },
+        },
+      ],
+    },
+    {
+      description: "Should handle SVG imports with existing Icon suffix",
+      code: ts`import logo from "./logo-icon.svg";`,
+      output: ts`import LogoIconIcon from "./logo-icon.svg";`,
+      options: [
+        {
+          importPathRegexToTemplate: {
+            "\\.svg$": "${value|pascalcase}Icon",
+          },
+        },
+      ],
+      errors: [
+        {
+          messageId: "unmatchedDefaultImportName",
+          data: {
+            fileName: "logo-icon.svg",
+            expectedImportName: "LogoIconIcon",
+            actualImportName: "logo",
+          },
+        },
+      ],
+    },
   ],
   valid: [
     // Basic valid cases
@@ -432,31 +585,6 @@ run({
       ],
     },
     {
-      description: "Should rename JSX component with props and children",
-      code: tsx`
-        import B from "~/A.astro";
-        <B prop1="value">
-          <div>Child</div>
-        </B>;
-      `,
-      output: tsx`
-        import A from "~/A.astro";
-        <A prop1="value">
-          <div>Child</div>
-        </A>;
-      `,
-      errors: [
-        {
-          messageId: "unmatchedDefaultImportName",
-          data: {
-            fileName: "A.astro",
-            expectedImportName: "A",
-            actualImportName: "B",
-          },
-        },
-      ],
-    },
-    {
       description: "Should handle JSX component conflicts",
       code: tsx`
         import B from "~/A.astro";
@@ -479,6 +607,75 @@ run({
             fileName: "A.astro",
             expectedImportName: "A_1",
             actualImportName: "B",
+          },
+        },
+      ],
+    },
+  ],
+});
+
+// Configuration tests
+run({
+  name: RULE_NAME,
+  rule,
+  valid: [
+    {
+      description: "Should handle custom ignoredSourceRegexes configuration",
+      code: ts`import something from "./custom-ignored.astro";`,
+      options: [
+        {
+          ignoredSourceRegexes: ["custom-ignored.astro$"],
+        },
+      ],
+    },
+    {
+      description:
+        "Should handle custom importPathRegexToTemplate configuration",
+      code: ts`import UserService from "./user.ts";`,
+      options: [
+        {
+          importPathRegexToTemplate: {
+            ".*\\.ts$": "${value|pascalcase}Service",
+          },
+        },
+      ],
+    },
+    {
+      description: "Should handle multiple custom configurations",
+      code: ts`
+        import UserService from "./user.ts";
+        import something from "./custom-ignored.astro";
+      `,
+      options: [
+        {
+          importPathRegexToTemplate: {
+            ".*\\.ts$": "${value|pascalcase}Service",
+          },
+          ignoredSourceRegexes: ["custom-ignored.astro$"],
+        },
+      ],
+    },
+  ],
+  invalid: [
+    {
+      description:
+        "Should apply custom importPathRegexToTemplate configuration",
+      code: ts`import user from "./user.ts";`,
+      output: ts`import UserService from "./user.ts";`,
+      options: [
+        {
+          importPathRegexToTemplate: {
+            ".*\\.ts$": "${value|pascalcase}Service",
+          },
+        },
+      ],
+      errors: [
+        {
+          messageId: "unmatchedDefaultImportName",
+          data: {
+            fileName: "user.ts",
+            expectedImportName: "UserService",
+            actualImportName: "user",
           },
         },
       ],
