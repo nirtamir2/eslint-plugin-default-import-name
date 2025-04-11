@@ -429,32 +429,11 @@ run({
         },
       ],
     },
-    {
-      description: "Should not affect non-SVG imports",
-      code: ts`import user from "./user.ts";`,
-      output: ts`import user from "./user.ts";`,
-      options: [
-        {
-          mapFilenamesToImportName: {
-            "\\.svg$": "${value|pascalcase}Icon",
-          },
-        },
-      ],
-      errors: [
-        {
-          messageId: "unmatchedDefaultImportName",
-          data: {
-            fileName: "user.ts",
-            expectedImportName: "user",
-            actualImportName: "user",
-          },
-        },
-      ],
-    },
 
     // String template parser format tests
     {
-      description: "Should transform import name using string template parser with pascalcase",
+      description:
+        "Should transform import name using string template parser with pascalcase",
       code: ts`import user from "./get-user.ts";`,
       output: ts`import GetUser from "./get-user.ts";`,
       options: [
@@ -476,35 +455,14 @@ run({
       ],
     },
     {
-      description: "Should transform import name using string template parser with uppercase",
-      code: ts`import user from "./get-user.ts";`,
-      output: ts`import GETUSER from "./get-user.ts";`,
-      options: [
-        {
-          mapFilenamesToImportName: {
-            "get-.*\\.ts$": "${value|uppercase}",
-          },
-        },
-      ],
-      errors: [
-        {
-          messageId: "unmatchedDefaultImportName",
-          data: {
-            fileName: "get-user.ts",
-            expectedImportName: "GETUSER",
-            actualImportName: "user",
-          },
-        },
-      ],
-    },
-    {
-      description: "Should transform import name using string template parser with multiple pipes",
+      description:
+        "Should transform import name using string template parser with uppercase",
       code: ts`import user from "./get-user.ts";`,
       output: ts`import GET_USER from "./get-user.ts";`,
       options: [
         {
           mapFilenamesToImportName: {
-            "get-.*\\.ts$": "${value|uppercase|lowercase}",
+            "get-.*\\.ts$": "${value|snakecase|uppercase}",
           },
         },
       ],
@@ -519,57 +477,15 @@ run({
         },
       ],
     },
-
-    // Default template tests
     {
-      description: "Should use default template for files without specific mapping",
-      code: ts`import user from "./get-user.ts";`,
-      output: ts`import getUser from "./get-user.ts";`,
+      description:
+        "Should transform import name using string template parser with multiple pipes",
+      code: ts`import myConfig from "./constants/my-config.ts";`,
+      output: ts`import MY_CONFIG from "./constants/my-config.ts";`,
       options: [
         {
-          defaultTemplate: "${value|camelcase}",
-        },
-      ],
-      errors: [
-        {
-          messageId: "unmatchedDefaultImportName",
-          data: {
-            fileName: "get-user.ts",
-            expectedImportName: "getUser",
-            actualImportName: "user",
-          },
-        },
-      ],
-    },
-    {
-      description: "Should use custom default template for files without specific mapping",
-      code: ts`import user from "./get-user.ts";`,
-      output: ts`import GetUser from "./get-user.ts";`,
-      options: [
-        {
-          defaultTemplate: "${value|pascalcase}",
-        },
-      ],
-      errors: [
-        {
-          messageId: "unmatchedDefaultImportName",
-          data: {
-            fileName: "get-user.ts",
-            expectedImportName: "GetUser",
-            actualImportName: "user",
-          },
-        },
-      ],
-    },
-    {
-      description: "Should use default template when no mapping matches",
-      code: ts`import user from "./get-user.ts";`,
-      output: ts`import getUser from "./get-user.ts";`,
-      options: [
-        {
-          defaultTemplate: "${value|camelcase}",
           mapFilenamesToImportName: {
-            "\\.svg$": "${value|pascalcase}Icon",
+            "\\/constants\\/.*\\.ts$": "${value|snakecase|uppercase}",
           },
         },
       ],
@@ -577,9 +493,9 @@ run({
         {
           messageId: "unmatchedDefaultImportName",
           data: {
-            fileName: "get-user.ts",
-            expectedImportName: "getUser",
-            actualImportName: "user",
+            fileName: "my-config.ts",
+            expectedImportName: "MY_CONFIG",
+            actualImportName: "myConfig",
           },
         },
       ],

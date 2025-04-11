@@ -1,4 +1,4 @@
-import { camelCase, pascalCase } from "scule";
+import { camelCase, flatCase, kebabCase, pascalCase, snakeCase } from "scule";
 import { createEslintRule } from "../utils";
 import { AST_NODE_TYPES, AST_TOKEN_TYPES } from "@typescript-eslint/utils";
 import type { RuleContext } from "@typescript-eslint/utils/ts-eslint";
@@ -27,9 +27,20 @@ function shouldIgnoreFile({
   });
 }
 
+export const defaultFilenamesToImportNameConfig = {
+  // Default mapping for all files
+  ".*": "${value}",
+  // Default mapping for files with kebab-case
+  ".*-.*": "${value|camelcase}",
+};
+
 export default createEslintRule<Options, MessageIds>({
   name: RULE_NAME,
-  defaultOptions: [],
+  defaultOptions: [
+    {
+      mapFilenamesToImportName: defaultFilenamesToImportNameConfig,
+    },
+  ],
   meta: {
     type: "problem",
     docs: {
@@ -72,7 +83,7 @@ export default createEslintRule<Options, MessageIds>({
 
   create(context) {
     const mappingConfig = (context.options[0]?.mapFilenamesToImportName ??
-      null) as Record<string, string> | null;
+      defaultFilenamesToImportNameConfig) as Record<string, string>;
 
     const configExcludedRegexes =
       (context.options[0]?.ignoredSourceRegexes as Array<string> | undefined) ??
@@ -125,6 +136,7 @@ export default createEslintRule<Options, MessageIds>({
         const expectedImportName = getExpectedImportNameWithoutConflicts({
           context,
           actualImportName,
+          sourceImport,
           fileName,
           mappingConfig,
         });
@@ -172,6 +184,9 @@ function transformSnippetText(snippetText: string, value: string): string {
   const pipeFunctions = {
     pascalcase: (val: string) => pascalCase(val),
     camelcase: (val: string) => camelCase(val),
+    kebabcase: (val: string) => kebabCase(val),
+    snakecase: (val: string) => snakeCase(val),
+    flatcase: (val: string) => flatCase(val),
     uppercase: (val: string) => val.toUpperCase(),
     lowercase: (val: string) => val.toLowerCase(),
   };
@@ -182,11 +197,13 @@ function transformSnippetText(snippetText: string, value: string): string {
 function getExpectedImportNameWithoutConflicts({
   context,
   actualImportName,
+  sourceImport,
   fileName,
   mappingConfig,
 }: {
   context: RuleContext<MessageIds, Options>;
   actualImportName: string;
+  sourceImport: string;
   fileName: string;
   mappingConfig: Record<string, string> | null;
 }) {
@@ -194,17 +211,18 @@ function getExpectedImportNameWithoutConflicts({
     ? fileName.split(".").slice(0, -1).join(".")
     : fileName;
 
-  let expectedImportName = fileNameWithoutExtension.includes("-")
-    ? camelCase(fileNameWithoutExtension)
-    : fileNameWithoutExtension;
+  let expectedImportName = fileNameWithoutExtension;
 
   // Apply mappingConfig if provided
   if (mappingConfig != null) {
-    for (const [regex, snippet] of Object.entries(mappingConfig)) {
-      if (new RegExp(regex).test(fileName)) {
+    for (const [regex, snippet] of Object.entries(mappingConfig).toReversed()) {
+      if (new RegExp(regex).test(sourceImport)) {
         try {
           // Transform the snippet text with the file name
-          const transformedName = transformSnippetText(snippet, fileNameWithoutExtension);
+          const transformedName = transformSnippetText(
+            snippet,
+            fileNameWithoutExtension,
+          );
           expectedImportName = transformedName;
           break; // Use the first matching pattern
         } catch (error) {
