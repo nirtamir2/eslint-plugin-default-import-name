@@ -3,25 +3,93 @@
 [![npm version][npm-version-src]][npm-version-href]
 [![npm downloads][npm-downloads-src]][npm-downloads-href]
 
-Enforce default imports matching file names
-This makes default export more structured.
+An ESLint plugin that enforces consistent and predictable naming conventions for default imports based on their source file names. This helps maintain a clean and standardized codebase by automatically ensuring that imported names follow a logical pattern.
 
-![default-import-name-demo.gif](docs%2Fdefault-import-name-demo.gif)
+## Features
 
-[Rules List](./src/rules)
+- 🔧 **Automatic Fixing**: Automatically fixes import names to match the expected convention
+- 📦 **Smart File Type Handling**: Different naming conventions for different file types (e.g., PascalCase for React components, camelCase for utilities)
+- 🛡️ **Conflict Resolution**: Automatically handles naming conflicts by appending numbers
+- ⚙️ **Configurable**: Customize naming patterns for different file paths using regex patterns
+- 🚫 **Ignorable Paths**: Configure paths to ignore (e.g., third-party modules)
 
-## Configuration
+## Default Conventions
+
+The plugin automatically applies these conventions:
+
+- React components (`.tsx`): PascalCase
+- Astro components (`.astro`): PascalCase
+- CSS files: `styles`
+- SVG files: camelCase with `Src` suffix
+- Other files: camelCase
+
+```json
+{
+  "importPathRegexToTemplate": {
+    // Kebab-case files to camelCase
+    ".*/[a-z0-9]+(-[a-z0-9]+)+(.[a-z0-9]+)?$": "${value|camelcase}",
+    // Astro files to PascalCase
+    ".*.astro": "${value|pascalcase}",
+    // React files to PascalCase
+    ".*.tsx": "${value|pascalcase}",
+    // CSS files to 'styles'
+    ".*.css": "styles",
+    // SVG files to camelCase with Src suffix
+    ".*.svg": "${value|camelcase}Src"
+  },
+  "ignoredSourceRegexes": [
+    // Third party modules that are not path alias
+    "^(?![@~])[^.]*$",
+    // Scoped packages
+    "^@[a-zA-Z0-9-_]+/[a-zA-Z0-9-_.]+$"
+  ]
+}
+```
+
+## Installation
 
 ```shell
 pnpm add -D eslint-plugin-default-import-name
 ```
 
-Add to your `eslint.config.js`
+## Configuration
+
+Add to your `eslint.config.js`:
 
 ```js
 import defaultImportNameConfig from "eslint-plugin-default-import-name/config";
 
 export default [defaultImportNameConfig()];
+```
+
+### Custom Configuration
+
+You can customize the naming conventions and ignored paths using the ESLint rule configuration:
+
+```js
+import defaultImportName from "eslint-plugin-default-import-name/plugin";
+
+export default [
+  {
+    plugins: {
+      "default-import-name": defaultImportName,
+    },
+    rules: {
+      "default-import-name/default-import-name": [
+        "warn",
+        {
+          // Ignore specific import paths
+          ignoredSourceRegexes: ["^@my-scope/.*$"],
+          // Custom naming patterns
+          importPathRegexToTemplate: {
+            ".*/components/.*": "${value|pascalcase}",
+            ".*/utils/.*": "${value|camelcase}",
+          },
+        },
+      ],
+    },
+  },
+];
 ```
 
 ## Supported Rules
