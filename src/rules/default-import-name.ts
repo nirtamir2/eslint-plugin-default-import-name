@@ -36,6 +36,8 @@ function shouldIgnoreFile({
 
 export const defaultImportPathToTemplateConfig: ImportPathRegexToTemplateConfig =
   {
+    // CSS files with query parameters (e.g., ?url, /url)
+    ".*\\.css([?/].*)?$": "styles",
     // Default mapping for files with kebab-case
     ".*/[a-z0-9]+(-[a-z0-9]+)+(.[a-z0-9]+)?$": "${value|camelcase}",
     // Astro files
@@ -51,10 +53,10 @@ export const defaultImportPathToTemplateConfig: ImportPathRegexToTemplateConfig 
 export const defaultIgnoredSourceRegexes = [
   /**
    * Third party modules that are not path alias
-   * File that does not include "."
-   * and not start with "~" or "\@" which are common path alias
+   * NPM packages don't contain "/" (path separators)
+   * and don't start with "~" or "\@" which are common path alias
    */
-  "^(?![@~])[^.]*$",
+  "^[^@~/][^/]*$",
   // ignore scoped packages
   "^@[a-zA-Z0-9-_]+\/[a-zA-Z0-9-_.]+$",
 ];

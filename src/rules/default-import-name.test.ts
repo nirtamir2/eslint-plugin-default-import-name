@@ -356,6 +356,23 @@ run({
       ],
     },
 
+    // CSS with query parameters tests
+    {
+      description: "Should enforce 'styles' import for CSS with ?url query",
+      code: ts`import myStyles from "./index.css?url";`,
+      output: ts`import styles from "./index.css?url";`,
+      errors: [
+        {
+          messageId: "unmatchedDefaultImportName",
+          data: {
+            fileName: "index.css?url",
+            expectedImportName: "styles",
+            actualImportName: "myStyles",
+          },
+        },
+      ],
+    },
+
     // SVG Icon pattern mapping tests
     {
       description: "Should add Icon suffix to SVG imports",
@@ -502,6 +519,20 @@ run({
       code: ts`import getUserProfile from "./get-user-profile.ts";`,
     },
 
+    // CSS with query parameters
+    {
+      description: "Should accept 'styles' import for CSS with ?url query",
+      code: ts`import styles from "./index.css?url";`,
+    },
+    {
+      description: "Should accept 'styles' import for CSS with /url suffix",
+      code: ts`import styles from "../index.css/url";`,
+    },
+    {
+      description: "Should accept 'styles' import for regular CSS files",
+      code: ts`import styles from "./index.css";`,
+    },
+
     // Ignored cases
     {
       description: "Should ignore third-party library imports",
@@ -514,6 +545,14 @@ run({
     {
       description: "Should ignore scoped package imports",
       code: ts`import A from "@a/b";`,
+    },
+    {
+      description: "Should ignore npm packages ending with .js like fuse.js",
+      code: ts`import Fuse from "fuse.js";`,
+    },
+    {
+      description: "Should ignore npm packages with dots like @kurkle/color",
+      code: ts`import color from "@kurkle/color";`,
     },
     {
       description: "Should ignore files matching ignoredSourceRegexes option",
