@@ -555,6 +555,20 @@ run({
       code: ts`import color from "@kurkle/color";`,
     },
     {
+      description: "Should ignore npm packages with subpath exports",
+      code: ts`
+        import recommended from "eslint-plugin-expect-type/configs/recommended";
+      `,
+    },
+    {
+      description: "Should ignore npm packages with deep subpath exports",
+      code: ts`import something from "some-package/deep/nested/path";`,
+    },
+    {
+      description: "Should ignore scoped packages with subpath exports",
+      code: ts`import config from "@scope/package/config";`,
+    },
+    {
       description: "Should ignore files matching ignoredSourceRegexes option",
       code: ts`import something from "./ignoredSource.astro";`,
       options: [

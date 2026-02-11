@@ -59,6 +59,8 @@ export const defaultIgnoredSourceRegexes = [
   "^[^@~/][^/]*$",
   // ignore scoped packages
   "^@[a-zA-Z0-9-_]+\/[a-zA-Z0-9-_.]+$",
+  // ignore npm packages with subpath exports (e.g. eslint-plugin-expect-type/configs/recommended)
+  "^[^@~./][^/]+/.*$",
 ];
 
 const pipeFunctions = {
