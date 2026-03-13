@@ -606,7 +606,6 @@ run({
     parser: typescriptEslintParser,
     parserOptions: {
       projectService: true,
-      project: "./tsconfig.json",
       tsconfigRootDir: `${import.meta.dirname}/fixtures-jsx`,
       ecmaFeatures: {
         jsx: true,
