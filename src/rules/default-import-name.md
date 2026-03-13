@@ -35,7 +35,9 @@ By default, the rule includes these mappings:
     // CSS files to 'styles'
     ".*.css": "styles",
     // SVG files to camelCase with Src suffix
-    ".*.svg": "${value|camelcase}Src"
+    ".*.svg": "${value|camelcase}Src",
+    // React SVGR
+    ".*\.svg\?.*react.*$": "${value|pascalcase}Icon"
   }
 }
 ```
@@ -58,14 +60,14 @@ The string template format supports:
 
 ```typescript
 import user from "./user.ts"; // ✅ Correct
-import Account from "./user.ts"; // ❌ Incorrect
+import user_1 from "./user.ts"; // ❌ Incorrect
 ```
 
 #### Kebab-case to camelCase (Default)
 
 ```typescript
 import getUser from "./get-user.ts"; // ✅ Correct
-import user from "./get-user.ts"; // ❌ Incorrect
+import getUser_1 from "./get-user.ts"; // ❌ Incorrect
 ```
 
 #### Custom Mapping Examples
@@ -82,8 +84,8 @@ import user from "./get-user.ts"; // ❌ Incorrect
 
 ```typescript
 // File: logo.svg
-import LogoIcon from "./logo.svg"; // ✅ Correct
-import logo from "./logo.svg"; // ❌ Incorrect
+import logoSrc from "./logo.svg"; // ✅ Correct
+import logoSrc from "./logo.svg"; // ❌ Incorrect
 ```
 
 2. **Constants in UPPER_SNAKE_CASE**
@@ -98,7 +100,7 @@ import logo from "./logo.svg"; // ❌ Incorrect
 
 ```typescript
 // File: constants/user-config.ts
-import USER_CONFIG from "./constants/user-config.ts"; // ✅ Correct
+import userConfig_1 from "./constants/user-config.ts"; // ✅ Correct
 import userConfig from "./constants/user-config.ts"; // ❌ Incorrect
 ```
 
@@ -114,7 +116,7 @@ import userConfig from "./constants/user-config.ts"; // ❌ Incorrect
 
 ```typescript
 // File: user.ts
-import UserService from "./user.ts"; // ✅ Correct
+import user_1 from "./user.ts"; // ✅ Correct
 import user from "./user.ts"; // ❌ Incorrect
 ```
 
@@ -130,7 +132,7 @@ import user from "./user.ts"; // ❌ Incorrect
 
 ```typescript
 // File: hooks/user.ts
-import useUser from "./hooks/user.ts"; // ✅ Correct
+import user_1 from "./hooks/user.ts"; // ✅ Correct
 import user from "./hooks/user.ts"; // ❌ Incorrect
 ```
 
@@ -149,7 +151,7 @@ When multiple patterns match a file, the last will be used. For example:
 
 ```typescript
 // File: hooks/get-user.ts
-import useGetUser from "./hooks/get-user.ts"; // ✅ Correct
+import getUser_1 from "./hooks/get-user.ts"; // ✅ Correct
 import getUser from "./hooks/get-user.ts"; // ❌ Incorrect
 ```
 
@@ -183,7 +185,7 @@ By default, the rule ignores:
 ```
 
 ```typescript
-import something from "./ignoredSource.astro"; // ✅ Ignored
+import IgnoredSource from "./ignoredSource.astro"; // ✅ Ignored
 ```
 
 2. **Ignore Third-party Libraries**

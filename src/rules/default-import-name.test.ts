@@ -1,12 +1,12 @@
-import rule, { RULE_NAME } from "./default-import-name.js";
-import { run } from "./_test";
-import { any as astro, any as ts, any as tsx } from "code-tag";
 import typescriptEslintParser from "@typescript-eslint/parser";
 import astroEslintParser from "astro-eslint-parser";
+import { any as astro, any as ts, any as tsx } from "code-tag";
+import { run } from "./_test";
+import defaultImportName, { RULE_NAME } from "./default-import-name.js";
 
 run({
   name: RULE_NAME,
-  rule,
+  rule: defaultImportName,
   invalid: [
     // Basic file name matching tests
     {
@@ -601,7 +601,7 @@ run({
 // JSX specific tests
 run({
   name: RULE_NAME,
-  rule,
+  rule: defaultImportName,
   languageOptions: {
     parser: typescriptEslintParser,
     parserOptions: {
@@ -669,7 +669,7 @@ run({
 // Configuration tests
 run({
   name: RULE_NAME,
-  rule,
+  rule: defaultImportName,
   valid: [
     {
       description: "Should handle custom ignoredSourceRegexes configuration",
@@ -737,7 +737,7 @@ run({
 
 run({
   name: RULE_NAME,
-  rule,
+  rule: defaultImportName,
   languageOptions: {
     parser: astroEslintParser,
   },
