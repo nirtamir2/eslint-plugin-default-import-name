@@ -732,6 +732,28 @@ run({
         },
       ],
     },
+    {
+      description: "Should apply React SVGR importPathRegexToTemplate configuration",
+      code: ts`import logo from "./logo.svg?react";`,
+      output: ts`import LogoIcon from "./logo.svg?react";`,
+      options: [
+        {
+          importPathRegexToTemplate: {
+            ".*\\.svg\\?.*react.*$": "${value|pascalcase}Icon",
+          },
+        },
+      ],
+      errors: [
+        {
+          messageId: "unmatchedDefaultImportName",
+          data: {
+            fileName: "logo.svg?react",
+            expectedImportName: "LogoIcon",
+            actualImportName: "logo",
+          },
+        },
+      ],
+    },
   ],
 });
 
