@@ -733,13 +733,14 @@ run({
       ],
     },
     {
-      description: "Should apply React SVGR importPathRegexToTemplate configuration",
+      description:
+        "Should apply React SVGR importPathRegexToTemplate configuration",
       code: ts`import logo from "./logo.svg?react";`,
       output: ts`import LogoIcon from "./logo.svg?react";`,
       options: [
         {
           importPathRegexToTemplate: {
-            ".*\\.svg\\?.*react.*$": "${value|pascalcase}Icon",
+            ".*.svg?.*react.*$": "${value|pascalcase}Icon",
           },
         },
       ],
