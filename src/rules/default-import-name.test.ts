@@ -1,12 +1,12 @@
-import rule, { RULE_NAME } from "./default-import-name.js";
-import { run } from "./_test";
-import { any as astro, any as ts, any as tsx } from "code-tag";
 import typescriptEslintParser from "@typescript-eslint/parser";
 import astroEslintParser from "astro-eslint-parser";
+import { any as astro, any as ts, any as tsx } from "code-tag";
+import { run } from "./_test";
+import defaultImportName, { RULE_NAME } from "./default-import-name.js";
 
 run({
   name: RULE_NAME,
-  rule,
+  rule: defaultImportName,
   invalid: [
     // Basic file name matching tests
     {
@@ -601,12 +601,11 @@ run({
 // JSX specific tests
 run({
   name: RULE_NAME,
-  rule,
+  rule: defaultImportName,
   languageOptions: {
     parser: typescriptEslintParser,
     parserOptions: {
       projectService: true,
-      project: "./tsconfig.json",
       tsconfigRootDir: `${import.meta.dirname}/fixtures-jsx`,
       ecmaFeatures: {
         jsx: true,
@@ -670,7 +669,7 @@ run({
 // Configuration tests
 run({
   name: RULE_NAME,
-  rule,
+  rule: defaultImportName,
   valid: [
     {
       description: "Should handle custom ignoredSourceRegexes configuration",
@@ -733,12 +732,35 @@ run({
         },
       ],
     },
+    {
+      description:
+        "Should apply React SVGR importPathRegexToTemplate configuration",
+      code: ts`import logo from "./logo.svg?react";`,
+      output: ts`import LogoIcon from "./logo.svg?react";`,
+      options: [
+        {
+          importPathRegexToTemplate: {
+            ".*.svg?.*react.*$": "${value|pascalcase}Icon",
+          },
+        },
+      ],
+      errors: [
+        {
+          messageId: "unmatchedDefaultImportName",
+          data: {
+            fileName: "logo.svg?react",
+            expectedImportName: "LogoIcon",
+            actualImportName: "logo",
+          },
+        },
+      ],
+    },
   ],
 });
 
 run({
   name: RULE_NAME,
-  rule,
+  rule: defaultImportName,
   languageOptions: {
     parser: astroEslintParser,
   },
