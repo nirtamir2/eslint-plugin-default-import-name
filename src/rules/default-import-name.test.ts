@@ -740,7 +740,8 @@ run({
       options: [
         {
           importPathRegexToTemplate: {
-            ".*.svg?.*react.*$": "${value|pascalcase}Icon",
+            // SVGR
+            ".*\.svg\?.*react.*$": "${value|pascalcase}Icon",
           },
         },
       ],
