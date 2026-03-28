@@ -37,9 +37,9 @@ By default, the rule includes these mappings:
     // SVG files to camelCase with Src suffix
     ".*.svg": "${value|camelcase}Src",
     // React SVGR
-    ".*.svg?.*react.*$": "${value|pascalcase}Icon"
+    ".*.svg?.*react.*$": "${value|pascalcase}Icon",
     // React SVG Url
-    ".*.svg?.*url.*$": "${value|camelcase}Url",
+    ".*.svg?.*url.*$": "${value|camelcase}Url"
   }
 }
 ```
