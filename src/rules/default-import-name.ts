@@ -50,6 +50,8 @@ export const defaultImportPathToTemplateConfig: ImportPathRegexToTemplateConfig 
     ".*.svg": "${value|camelcase}Src",
     // React SVGR
     ".*\.svg\?.*react.*$": "${value|pascalcase}Icon",
+    // React SVG Url
+    ".*\.svg\?.*url.*$": "${value|camelcase}Url",
   };
 
 export const defaultIgnoredSourceRegexes = [
